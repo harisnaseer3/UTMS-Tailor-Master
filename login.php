@@ -54,17 +54,7 @@ require_once 'includes/header.php';
             <?php echo __('login'); ?>
         </h2>
         
-        <?php if (!empty($errorMsg)): ?>
-            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgb(239, 68, 68); color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: center;">
-                ⚠️ <?php echo htmlspecialchars($errorMsg); ?>
-            </div>
-        <?php endif; ?>
-        
-        <?php if (isset($_GET['msg']) && $_GET['msg'] === 'logged_out'): ?>
-            <div style="background: rgba(13, 242, 138, 0.1); border: 1px solid var(--neon-emerald); color: #a7f3d0; padding: 10px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; text-align: center;">
-                🔒 You have been signed out successfully.
-            </div>
-        <?php endif; ?>
+
 
         <form action="login.php" method="POST">
             <!-- Shop Selection (Required for Multi-Tenant Scoping) -->
@@ -87,7 +77,15 @@ require_once 'includes/header.php';
             
             <div class="form-group">
                 <label class="form-label" for="password"><?php echo __('password'); ?> *</label>
-                <input type="password" name="password" id="password" class="form-control" required placeholder="Enter password...">
+                <div style="position: relative;">
+                    <input type="password" name="password" id="password" class="form-control" required placeholder="Enter password..." style="padding-inline-end: 45px;">
+                    <button type="button" onclick="togglePasswordVisibility('password', this)" style="position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;" title="Toggle Password Visibility">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
             
             <button type="submit" class="btn-glass btn-neon-cyan" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">

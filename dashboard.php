@@ -21,13 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
         $phone = trim($_POST['phone'] ?? '');
         
         if (empty($name) || empty($phone)) {
-            $errorMsg = 'Customer name and phone number are required.';
+            $_SESSION['error_msg'] = 'Customer name and phone number are required.';
         } else {
             // Check if phone number is already registered in this shop
             $check = $pdo->prepare("SELECT id FROM customers WHERE phone = ? AND shop_id = ?");
             $check->execute([$phone, $shopId]);
             if ($check->rowCount() > 0) {
-                $errorMsg = 'A customer with this phone number is already registered.';
+                $_SESSION['error_msg'] = 'A customer with this phone number is already registered.';
             } else {
                 try {
                     // Seed empty measurement tree structure
@@ -44,12 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                     
                     $stmt = $pdo->prepare("INSERT INTO customers (shop_id, name, phone, measurements) VALUES (?, ?, ?, ?)");
                     $stmt->execute([$shopId, $name, $phone, json_encode($emptyTree)]);
-                    $successMsg = 'Customer profile added successfully.';
+                    $_SESSION['success_msg'] = 'Customer profile added successfully.';
                 } catch (PDOException $e) {
-                    $errorMsg = 'Error saving customer: ' . $e->getMessage();
+                    $_SESSION['error_msg'] = 'Error saving customer: ' . $e->getMessage();
                 }
             }
         }
+        header("Location: dashboard.php");
+        exit();
     }
     
     // 2. CREATE NEW ORDER
@@ -62,13 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
         $session_id = trim($_POST['bridge_session_id'] ?? ''); // Bridge photo connection
         
         if (empty($customerId) || empty($tagId)) {
-            $errorMsg = 'Customer and Tag ID are required.';
+            $_SESSION['error_msg'] = 'Customer and Tag ID are required.';
         } else {
             // Verify if tag is unique
             $check = $pdo->prepare("SELECT id FROM orders WHERE tag_id = ?");
             $check->execute([$tagId]);
             if ($check->rowCount() > 0) {
-                $errorMsg = 'This Tag ID is already assigned to another order.';
+                $_SESSION['error_msg'] = 'This Tag ID is already assigned to another order.';
             } else {
                 try {
                     // Get customer's current measurements to snap into order
@@ -91,12 +93,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                     $stmt = $pdo->prepare("INSERT INTO orders (shop_id, customer_id, tag_id, measurements_snapshot, fabric_image, status, notes, price, advance_paid) VALUES (?, ?, ?, ?, ?, 'received', ?, ?, ?)");
                     $stmt->execute([$shopId, $customerId, $tagId, $measurements, $fabricImage, $notes, $price, $advance]);
                     
-                    $successMsg = 'Order created successfully.';
+                    $_SESSION['success_msg'] = 'Order created successfully.';
                 } catch (PDOException $e) {
-                    $errorMsg = 'Error creating order: ' . $e->getMessage();
+                    $_SESSION['error_msg'] = 'Error creating order: ' . $e->getMessage();
                 }
             }
         }
+        header("Location: dashboard.php");
+        exit();
+    }
+
+    // 3. ADD WORKSHOP STAFF (Karigar or Tailor Master)
+    if (isset($_POST['action']) && $_POST['action'] === 'add_staff') {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $roleSelected = $_POST['role'] ?? 'karigar';
+        $phone = trim($_POST['phone'] ?? '');
+        
+        if (empty($username) || empty($password)) {
+            $_SESSION['error_msg'] = 'Username and password are required.';
+        } elseif (!in_array($roleSelected, ['karigar', 'master'])) {
+            $_SESSION['error_msg'] = 'Invalid role selected.';
+        } else {
+            // Check if username is already registered in this shop
+            $check = $pdo->prepare("SELECT id FROM users WHERE username = ? AND shop_id = ?");
+            $check->execute([$username, $shopId]);
+            if ($check->rowCount() > 0) {
+                $_SESSION['error_msg'] = 'Username is already taken for this shop.';
+            } else {
+                try {
+                    $hashedPass = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt = $pdo->prepare("INSERT INTO users (shop_id, username, password, role, phone) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$shopId, $username, $hashedPass, $roleSelected, $phone]);
+                    $_SESSION['success_msg'] = 'Workshop staff added successfully.';
+                } catch (PDOException $e) {
+                    $_SESSION['error_msg'] = 'Error saving staff: ' . $e->getMessage();
+                }
+            }
+        }
+        header("Location: dashboard.php");
+        exit();
     }
 }
 
@@ -188,18 +224,7 @@ $newTagId = date('Y') . '-' . str_pad(rand(100, 9999), 4, '0', STR_PAD_LEFT);
 require_once 'includes/header.php';
 ?>
 
-<!-- Alerts -->
-<?php if (!empty($errorMsg)): ?>
-    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgb(239, 68, 68); color: #fca5a5; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 25px; text-align: center;">
-        ⚠️ <?php echo htmlspecialchars($errorMsg); ?>
-    </div>
-<?php endif; ?>
 
-<?php if (!empty($successMsg) || (isset($_GET['msg']) && $_GET['msg'] === 'welcome')): ?>
-    <div style="background: rgba(13, 242, 138, 0.1); border: 1px solid var(--neon-emerald); color: #a7f3d0; padding: 12px; border-radius: 8px; font-size: 14px; margin-bottom: 25px; text-align: center;">
-        🎉 <?php echo !empty($successMsg) ? htmlspecialchars($successMsg) : 'Welcome to your UTMS workspace dashboard!'; ?>
-    </div>
-<?php endif; ?>
 
 <?php if ($role === 'master'): ?>
     <!-- ==================== TAILOR MASTER DASHBOARD ==================== -->
@@ -542,6 +567,7 @@ require_once 'includes/header.php';
         
         <form action="api/save_measurements.php" method="POST" id="vault-form">
             <input type="hidden" name="customer_id" id="vault_customer_id" value="">
+            <input type="hidden" name="redirect_back" value="1">
             
             <div id="measurement-fields-container">
                 <!-- Dynamically loaded via views/measurement_inputs.php or standard PHP loading -->

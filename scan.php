@@ -5,6 +5,8 @@ require_once 'includes/auth.php';
 require_once 'includes/dictionary.php';
 
 $pdo = getDBConnection();
+$role = $_SESSION['role'] ?? '';
+$shopId = getCurrentShopId();
 $tagId = $_GET['id'] ?? '';
 $error = '';
 $order = null;

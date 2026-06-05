@@ -574,15 +574,15 @@ select.form-control option {
 /* Toast Messages */
 .aether-toast {
     position: fixed;
-    bottom: 24px;
-    right: 24px;
+    top: 90px;
+    inset-inline-end: 24px;
     background: rgba(15, 11, 30, 0.95);
     border-left: 4px solid var(--neon-cyan);
     box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
     padding: 16px 24px;
     border-radius: 4px;
     z-index: 10000;
-    transform: translateY(100px);
+    transform: translateY(-50px);
     opacity: 0;
     transition: var(--transition-smooth);
 }
