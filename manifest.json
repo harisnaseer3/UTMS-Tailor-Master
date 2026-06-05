@@ -1,0 +1,17 @@
+{
+  "short_name": "UTMS",
+  "name": "Universal Tailoring Management System",
+  "description": "Progressive Web App for Multi-Tenant Tailoring Workshops",
+  "start_url": "index.php",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07050f",
+  "theme_color": "#07050f",
+  "icons": [
+    {
+      "src": "public/uploads/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ]
+}
