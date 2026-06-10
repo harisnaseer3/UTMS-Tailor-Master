@@ -200,21 +200,44 @@ if ($role === 'master' || $role === 'karigar') {
     $customerProfile = null;
     
     if ($customerId) {
-        // Fetch Customer details & measurements
-        $stmtCust = $pdo->prepare("SELECT * FROM customers WHERE id = ? AND shop_id = ?");
-        $stmtCust->execute([$customerId, $shopId]);
+        // Fetch Customer details & measurements (handle nullable shopId)
+        if ($shopId === null) {
+            $stmtCust = $pdo->prepare("SELECT * FROM customers WHERE id = ? AND shop_id IS NULL");
+            $stmtCust->execute([$customerId]);
+        } else {
+            $stmtCust = $pdo->prepare("SELECT * FROM customers WHERE id = ? AND shop_id = ?");
+            $stmtCust->execute([$customerId, $shopId]);
+        }
         $customerProfile = $stmtCust->fetch();
         
-        // Fetch Customer orders
-        $stmtCustOrders = $pdo->prepare("
-            SELECT o.*, s.name as shop_name 
-            FROM orders o 
-            JOIN shops s ON o.shop_id = s.id 
-            WHERE o.customer_id = ? 
-            ORDER BY o.created_at DESC
-        ");
-        $stmtCustOrders->execute([$customerId]);
-        $ordersList = $stmtCustOrders->fetchAll();
+        // Fetch Customer orders across all workshops matching their phone or customer ID
+        $custIds = [];
+        if (!empty($customerId)) {
+            $custIds[] = $customerId;
+        }
+        
+        $userPhone = $_SESSION['phone'] ?? null;
+        if (!empty($userPhone)) {
+            $stmtAllCust = $pdo->prepare("SELECT id FROM customers WHERE phone = ?");
+            $stmtAllCust->execute([$userPhone]);
+            $custIds = array_merge($custIds, $stmtAllCust->fetchAll(PDO::FETCH_COLUMN));
+        }
+        $custIds = array_unique(array_filter($custIds));
+        
+        if (!empty($custIds)) {
+            $inClause = implode(',', array_fill(0, count($custIds), '?'));
+            $stmtCustOrders = $pdo->prepare("
+                SELECT o.*, s.name as shop_name 
+                FROM orders o 
+                JOIN shops s ON o.shop_id = s.id 
+                WHERE o.customer_id IN ($inClause) 
+                ORDER BY o.created_at DESC
+            ");
+            $stmtCustOrders->execute($custIds);
+            $ordersList = $stmtCustOrders->fetchAll();
+        } else {
+            $ordersList = [];
+        }
     }
 }
 

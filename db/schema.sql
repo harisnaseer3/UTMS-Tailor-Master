@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- 3. Customers (Scoped per Shop)
 CREATE TABLE IF NOT EXISTS `customers` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `shop_id` INT NOT NULL,
+  `shop_id` INT DEFAULT NULL,
   `user_id` INT DEFAULT NULL,
   `name` VARCHAR(100) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,

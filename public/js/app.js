@@ -248,6 +248,44 @@ function stopBridgePolling() {
     }
 }
 
+// ==================== KANBAN COLUMN LIVE SEARCH ====================
+function filterColumnCards(statusKey, query) {
+    const normalized = query.trim().toLowerCase();
+    const column = document.getElementById('col-' + statusKey);
+    if (!column) return;
+
+    const cardsContainer = column.querySelector('.column-cards-container');
+    if (!cardsContainer) return;
+
+    const cards = cardsContainer.querySelectorAll('.kanban-card');
+    let visibleCount = 0;
+
+    cards.forEach(function(card) {
+        const tag = card.querySelector('.card-tag');
+        const customer = card.querySelector('.card-cust');
+        const notesEl = card.querySelector('div[style*="font-style"]');
+
+        const tagText = tag ? tag.textContent.toLowerCase() : '';
+        const custText = customer ? customer.textContent.toLowerCase() : '';
+        const notesText = notesEl ? notesEl.textContent.toLowerCase() : '';
+
+        const combined = tagText + ' ' + custText + ' ' + notesText;
+
+        if (normalized === '' || combined.indexOf(normalized) !== -1) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+
+    // Toggle empty placeholder
+    const placeholder = cardsContainer.querySelector('.kanban-empty-placeholder');
+    if (placeholder) {
+        placeholder.style.display = (visibleCount === 0) ? '' : 'none';
+    }
+}
+
 // Double check decimal / numeric float inputs for measurements
 document.addEventListener('DOMContentLoaded', () => {
     const numberInputs = document.querySelectorAll('input[type="number"]');

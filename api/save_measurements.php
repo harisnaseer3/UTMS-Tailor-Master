@@ -39,8 +39,13 @@ try {
         if ($_SESSION['customer_id'] != $customerId) {
             throw new Exception("Unauthorized to edit this profile");
         }
-        $stmtCheck = $pdo->prepare("SELECT id FROM customers WHERE id = ? AND shop_id = ?");
-        $stmtCheck->execute([$customerId, $shopId]);
+        if ($shopId === null) {
+            $stmtCheck = $pdo->prepare("SELECT id FROM customers WHERE id = ? AND shop_id IS NULL");
+            $stmtCheck->execute([$customerId]);
+        } else {
+            $stmtCheck = $pdo->prepare("SELECT id FROM customers WHERE id = ? AND shop_id = ?");
+            $stmtCheck->execute([$customerId, $shopId]);
+        }
         if ($stmtCheck->rowCount() === 0) {
             throw new Exception("Profile matching workspace not found");
         }
@@ -84,8 +89,13 @@ try {
     ]);
 
     // 3. Update Database
-    $stmtUpdate = $pdo->prepare("UPDATE customers SET measurements = ? WHERE id = ? AND shop_id = ?");
-    $stmtUpdate->execute([$measurementsJson, $customerId, $shopId]);
+    if ($shopId === null) {
+        $stmtUpdate = $pdo->prepare("UPDATE customers SET measurements = ? WHERE id = ? AND shop_id IS NULL");
+        $stmtUpdate->execute([$measurementsJson, $customerId]);
+    } else {
+        $stmtUpdate = $pdo->prepare("UPDATE customers SET measurements = ? WHERE id = ? AND shop_id = ?");
+        $stmtUpdate->execute([$measurementsJson, $customerId, $shopId]);
+    }
 
     // 4. Return response
     if ($redirectBack) {

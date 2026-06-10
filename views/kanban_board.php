@@ -29,15 +29,16 @@ $statuses = [
 ];
 ?>
 
-<div class="kanban-container">
+
+    <div class="kanban-container">
     <?php foreach ($statuses as $statusKey => $statusMeta): ?>
         <div class="kanban-column" id="col-<?php echo $statusKey; ?>" ondragover="allowDrop(event)" ondrop="handleDrop(event, '<?php echo $statusKey; ?>')">
             <div class="column-header">
-                <span class="column-title <?php echo $statusMeta['color']; ?>">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span class="column-title"><?php echo $statusMeta['title']; ?></span>
                     <span style="display:inline-block; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></span>
-                    <?php echo $statusMeta['title']; ?>
-                </span>
-                <span class="column-count"><?php echo count($kanbanOrders[$statusKey]); ?></span>
+                </div>
+                <input type="text" class="kanban-col-search" placeholder="Search by name..." oninput="filterColumnCards('<?php echo $statusKey; ?>', this.value)" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
             </div>
             
             <div class="column-cards-container" style="min-height: 400px;">
@@ -114,3 +115,44 @@ $statuses = [
         <p style="text-align: center; color: var(--text-secondary); margin-top: 10px; font-size: 14px;">Click anywhere to close</p>
     </div>
 </div>
+
+<script>
+// Kanban column live search — inline to avoid caching issues
+function filterColumnCards(statusKey, query) {
+    var normalized = query.trim().toLowerCase();
+    var column = document.getElementById('col-' + statusKey);
+    if (!column) return;
+
+    var cardsContainer = column.querySelector('.column-cards-container');
+    if (!cardsContainer) return;
+
+    var cards = cardsContainer.querySelectorAll('.kanban-card');
+    var visibleCount = 0;
+
+    for (var i = 0; i < cards.length; i++) {
+        var card = cards[i];
+        var tagEl = card.querySelector('.card-tag');
+        var custEl = card.querySelector('.card-cust');
+        var notesEl = card.querySelector('div[style*="font-style"]');
+
+        var tagText = tagEl ? tagEl.textContent.trim().toLowerCase() : '';
+        var custText = custEl ? custEl.textContent.trim().toLowerCase() : '';
+        var notesText = notesEl ? notesEl.textContent.trim().toLowerCase() : '';
+
+        var combined = tagText + ' ' + custText + ' ' + notesText;
+
+        if (normalized === '' || combined.indexOf(normalized) !== -1) {
+            card.style.display = '';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    }
+
+    // Toggle empty placeholder
+    var placeholder = cardsContainer.querySelector('.kanban-empty-placeholder');
+    if (placeholder) {
+        placeholder.style.display = (visibleCount === 0) ? '' : 'none';
+    }
+}
+</script>

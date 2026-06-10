@@ -60,12 +60,12 @@ function canViewCustomerContact() {
 function loginUser($username, $password, $shopId = null) {
     $pdo = getDBConnection();
     
-    if ($shopId) {
+    if (!empty($shopId)) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND shop_id = ?");
         $stmt->execute([$username, $shopId]);
     } else {
-        // Customer login might not specify a shop initially or log in globally
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ?");
+        // Customer login does not specify a shop
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND role = 'customer'");
         $stmt->execute([$username]);
     }
     
@@ -76,6 +76,7 @@ function loginUser($username, $password, $shopId = null) {
         $_SESSION['username'] = $user['username'];
         $_SESSION['role'] = $user['role'];
         $_SESSION['shop_id'] = $user['shop_id'];
+        $_SESSION['phone'] = $user['phone'] ?? null;
         
         // If customer, check if they have a customer record
         if ($user['role'] === 'customer') {

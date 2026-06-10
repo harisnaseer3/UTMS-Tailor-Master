@@ -47,6 +47,13 @@ function getDBConnection() {
             }
         }
         
+        // Auto-migration to allow nullable shop_id in customers table
+        try {
+            $pdo->exec("ALTER TABLE `customers` MODIFY COLUMN `shop_id` INT DEFAULT NULL");
+        } catch (PDOException $e) {
+            // Table might not exist or alter already done
+        }
+        
         return $pdo;
     } catch (PDOException $e) {
         die("Database connection failed: " . $e->getMessage());

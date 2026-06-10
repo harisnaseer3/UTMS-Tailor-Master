@@ -22,7 +22,7 @@ $errorMsg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    $shopId = $_POST['shop_id'] ?? null;
+    $shopId = !empty($_POST['shop_id']) ? intval($_POST['shop_id']) : null;
     
     if (empty($username) || empty($password)) {
         $errorMsg = 'Please enter both username and password.';
@@ -54,21 +54,29 @@ require_once 'includes/header.php';
             <?php echo __('login'); ?>
         </h2>
         
-
+        <!-- Modern Role Tabs -->
+        <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px;">
+            <button type="button" id="tab-staff" onclick="setLoginMode('staff')" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 2px solid var(--neon-cyan); color: var(--neon-cyan); font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                Workshop Staff
+            </button>
+            <button type="button" id="tab-customer" onclick="setLoginMode('customer')" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+                Customer
+            </button>
+        </div>
+        <input type="hidden" name="login_mode" id="login_mode" value="staff">
 
         <form action="login.php" method="POST">
             <!-- Shop Selection (Required for Multi-Tenant Scoping) -->
-            <div class="form-group">
-                <label class="form-label" for="shop_id"><?php echo __('shop'); ?> *</label>
-                <select name="shop_id" id="shop_id" class="form-control" required>
-                    <option value=""><?php echo __('select_customer'); ?>...</option>
-                    <?php foreach ($shops as $shop): ?>
-                        <option value="<?php echo $shop['id']; ?>">
-                            <?php echo htmlspecialchars($shop['name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+    <div class="form-group" id="shop-selection-group">
+    <label class="form-label" for="shop_search"><?php echo __('shop'); ?> *</label>
+        <input type="text" id="shop_search" name="shop_search" class="form-control" placeholder="<?php echo __('select_customer'); ?>..." autocomplete="off" list="shop_options" required>
+    <input type="hidden" name="shop_id" id="shop_id">
+    <datalist id="shop_options">
+            <?php foreach ($shops as $shop): ?>
+                <option value="<?php echo htmlspecialchars($shop['name']); ?>" data-id="<?php echo $shop['id']; ?>"></option>
+            <?php endforeach; ?>
+    </datalist>
+</div>
             
             <div class="form-group">
                 <label class="form-label" for="username"><?php echo __('username'); ?> *</label>
@@ -88,7 +96,7 @@ require_once 'includes/header.php';
                 </div>
             </div>
             
-            <button type="submit" class="btn-glass btn-neon-cyan" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
+            <button type="submit" class="btn-glass btn-neon-cyan" id="login_btn" style="width: 100%; justify-content: center; padding: 12px; margin-top: 10px;">
                 <?php echo __('login'); ?>
             </button>
         </form>
@@ -98,6 +106,76 @@ require_once 'includes/header.php';
         </div>
     </div>
 </div>
+
+<script>
+function setLoginMode(mode) {
+    const shopGroup = document.getElementById('shop-selection-group');
+    const shopSelect = document.getElementById('shop_id');
+    const loginModeInput = document.getElementById('login_mode');
+    const tabStaff = document.getElementById('tab-staff');
+    const tabCustomer = document.getElementById('tab-customer');
+    const loginBtn = document.getElementById('login_btn');
+    
+    loginModeInput.value = mode;
+    
+    if (mode === 'customer') {
+        shopGroup.style.display = 'none';
+        shopSelect.removeAttribute('required');
+        shopSelect.value = '';
+        
+        tabCustomer.style.color = 'var(--neon-gold)';
+        tabCustomer.style.borderBottomColor = 'var(--neon-gold)';
+        tabCustomer.style.fontWeight = '600';
+        
+        tabStaff.style.color = 'var(--text-secondary)';
+        tabStaff.style.borderBottomColor = 'transparent';
+        tabStaff.style.fontWeight = '500';
+        
+        // Add subtle gold tint to login button for customer
+        loginBtn.className = 'btn-glass';
+        loginBtn.style.borderColor = 'var(--neon-gold)';
+        loginBtn.style.color = 'var(--neon-gold)';
+    } else {
+        shopGroup.style.display = 'block';
+        shopSelect.setAttribute('required', 'required');
+        
+        tabStaff.style.color = 'var(--neon-cyan)';
+        tabStaff.style.borderBottomColor = 'var(--neon-cyan)';
+        tabStaff.style.fontWeight = '600';
+        
+        tabCustomer.style.color = 'var(--text-secondary)';
+        tabCustomer.style.borderBottomColor = 'transparent';
+        tabCustomer.style.fontWeight = '500';
+        
+        // Reset cyan button class
+        loginBtn.className = 'btn-glass btn-neon-cyan';
+        loginBtn.style.borderColor = '';
+        loginBtn.style.color = '';
+    }
+}
+
+// Live shop search handling
+(function() {
+    const shopSearch = document.getElementById('shop_search');
+    const shopIdInput = document.getElementById('shop_id');
+    const shopOptions = document.getElementById('shop_options').options;
+
+    shopSearch.addEventListener('input', function () {
+        const val = this.value.trim();
+        let matched = false;
+        for (let i = 0; i < shopOptions.length; i++) {
+            if (shopOptions[i].value === val) {
+                shopIdInput.value = shopOptions[i].dataset.id;
+                matched = true;
+                break;
+            }
+        }
+        if (!matched) {
+            shopIdInput.value = '';
+        }
+    });
+})();
+</script>
 
 <?php
 require_once 'includes/footer.php';
