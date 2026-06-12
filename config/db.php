@@ -65,6 +65,11 @@ function getDBConnection() {
             // Table might not exist or alter already done
         }
         
+        // Auto-migration for dispatched status
+        try {
+            $pdo->exec("ALTER TABLE `orders` MODIFY COLUMN `status` ENUM('received', 'cutting', 'stitching', 'ready', 'dispatched') DEFAULT 'received'");
+        } catch (PDOException $e) {}
+        
         return $pdo;
     } catch (PDOException $e) {
         die("Database connection failed: " . $e->getMessage());

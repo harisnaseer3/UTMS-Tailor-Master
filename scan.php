@@ -68,6 +68,8 @@ require_once 'includes/header.php';
                     <span style="color: var(--neon-cyan); font-size: 13px; border: 1px solid var(--neon-cyan); padding: 3px 10px; border-radius: 12px; background: rgba(0,240,255,0.1); font-weight: bold;"><?php echo __('status_stitching'); ?></span>
                 <?php elseif ($order['status'] === 'ready'): ?>
                     <span style="color: var(--neon-emerald); font-size: 13px; border: 1px solid var(--neon-emerald); padding: 3px 10px; border-radius: 12px; background: rgba(13,242,138,0.1); font-weight: bold;"><?php echo __('status_ready'); ?></span>
+                <?php elseif ($order['status'] === 'dispatched'): ?>
+                    <span style="color: #6b7280; font-size: 13px; border: 1px solid #6b7280; padding: 3px 10px; border-radius: 12px; background: rgba(107,114,128,0.1); font-weight: bold;"><?php echo __('status_dispatched'); ?></span>
                 <?php endif; ?>
                 </div>
             </div>
@@ -163,6 +165,11 @@ require_once 'includes/header.php';
                         <button onclick="updateOrderStatus(<?php echo $order['id']; ?>, 'ready')" class="btn-glass <?php echo $order['status'] === 'ready' ? 'btn-neon-emerald' : ''; ?>" style="font-size: 12px; justify-content: center;">
                             <?php echo __('status_ready'); ?>
                         </button>
+                        <?php if ($order['status'] === 'ready' || $order['status'] === 'dispatched'): ?>
+                        <button onclick="updateOrderStatus(<?php echo $order['id']; ?>, 'dispatched')" class="btn-glass <?php echo $order['status'] === 'dispatched' ? 'btn-neon-emerald' : ''; ?>" style="font-size: 12px; justify-content: center; grid-column: span 2; border-color: var(--neon-gold); color: var(--neon-gold);">
+                            <?php echo __('status_dispatched'); ?>
+                        </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             <?php else: ?>

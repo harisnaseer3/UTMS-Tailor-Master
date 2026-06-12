@@ -184,7 +184,7 @@ if ($role === 'master' || $role === 'karigar') {
         $statsStmt = $pdo->prepare("
             SELECT 
                 SUM(price) as total_rev, 
-                COUNT(id) as total_count,
+                SUM(CASE WHEN status != 'dispatched' THEN 1 ELSE 0 END) as total_count,
                 SUM(price - advance_paid) as outstanding
             FROM orders 
             WHERE shop_id = ?
@@ -271,8 +271,8 @@ require_once 'includes/header.php';
         </div>
         <div style="display: flex; gap: 12px;">
             <button onclick="openModal('modal-staff')" class="btn-glass btn-neon-gold">+ Add Karigar / کاریگر</button>
-            <button onclick="openModal('modal-customer')" class="btn-glass btn-neon-orchid">+ <?php echo __('add_customer'); ?></button>
-            <button onclick="openModal('modal-order')" class="btn-glass btn-neon-cyan">+ <?php echo __('new_order'); ?></button>
+            <button onclick="openModal('modal-customer')" class="btn-glass btn-neon-orchid">+ Add Customer / نیا گاہک</button>
+            <button onclick="openModal('modal-order')" class="btn-glass btn-neon-cyan">+ Create New Order / نیا آرڈر</button>
         </div>
     </div>
 
@@ -317,6 +317,48 @@ require_once 'includes/header.php';
         </p>
         
         <?php include 'views/kanban_board.php'; ?>
+    </div>
+
+    <!-- Completed Orders Section -->
+    <div class="glass-card" style="margin-bottom: 30px;">
+        <h3 style="margin-bottom: 10px; font-size: 18px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+            ✅ Completed Orders (Dispatched)
+        </h3>
+        <div style="overflow-x: auto; margin-top: 15px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 13px;">
+                        <th style="padding: 10px 5px;"><?php echo __('tag_id'); ?></th>
+                        <th style="padding: 10px 5px;"><?php echo __('customer_name'); ?></th>
+                        <th style="padding: 10px 5px;">Date Dispatched</th>
+                        <th style="padding: 10px 5px; text-align: right;"><?php echo __('actions'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $dispatchedCount = 0;
+                    foreach ($ordersList as $ord): 
+                        if ($ord['status'] === 'dispatched'):
+                            $dispatchedCount++;
+                    ?>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
+                            <td style="padding: 12px 5px; font-weight: bold; color: #6b7280;"><?php echo htmlspecialchars($ord['tag_id']); ?></td>
+                            <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo htmlspecialchars($ord['customer_name']); ?></td>
+                            <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($ord['created_at'])); ?></td>
+                            <td style="padding: 12px 5px; text-align: right;">
+                                <a href="print_receipt.php?id=<?php echo urlencode($ord['tag_id']); ?>" target="_blank" class="btn-glass" style="padding: 4px 8px; font-size: 11px; text-decoration: none;" title="Print Receipt">🖨️</a>
+                            </td>
+                        </tr>
+                    <?php 
+                        endif;
+                    endforeach; 
+                    if ($dispatchedCount === 0):
+                    ?>
+                        <tr><td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">No completed orders yet.</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Customers & Sizing Vault Scopes -->
@@ -731,24 +773,24 @@ require_once 'includes/header.php';
 <div id="modal-customer" class="modal-overlay">
     <div class="modal-content glass-card" style="max-width: 450px;">
         <h3 style="color: var(--neon-orchid); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            👥 <?php echo __('add_new_customer'); ?>
+            👥 Add Customer / نیا گاہک شامل کریں
         </h3>
         <form action="dashboard.php" method="POST">
             <input type="hidden" name="action" value="add_customer">
             
             <div class="form-group">
-                <label class="form-label" for="cust_name"><?php echo __('customer_name'); ?> *</label>
+                <label class="form-label" for="cust_name">Customer Name / گاہک کا نام *</label>
                 <input type="text" name="name" id="cust_name" class="form-control" required placeholder="Ali Khan">
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="cust_phone"><?php echo __('phone'); ?> *</label>
+                <label class="form-label" for="cust_phone">Phone Number / فون نمبر *</label>
                 <input type="text" name="phone" id="cust_phone" class="form-control" required placeholder="03001234567">
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button type="submit" class="btn-glass btn-neon-orchid" style="flex: 1; justify-content: center;"><?php echo __('save'); ?></button>
-                <button type="button" onclick="closeModal('modal-customer')" class="btn-glass" style="flex: 1; justify-content: center;"><?php echo __('cancel'); ?></button>
+                <button type="submit" class="btn-glass btn-neon-orchid" style="flex: 1; justify-content: center;">Save / محفوظ کریں</button>
+                <button type="button" onclick="closeModal('modal-customer')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel / منسوخ کریں</button>
             </div>
         </form>
     </div>
@@ -758,21 +800,21 @@ require_once 'includes/header.php';
 <div id="modal-order" class="modal-overlay">
     <div class="modal-content glass-card" style="max-width: 550px;">
         <h3 style="color: var(--neon-cyan); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            📦 <?php echo __('new_order'); ?>
+            📦 Create Order / نیا آرڈر درج کریں
         </h3>
         <form action="dashboard.php" method="POST">
             <input type="hidden" name="action" value="create_order">
             <input type="hidden" name="bridge_session_id" id="bridge_session_id" value="">
             
             <div class="form-group">
-                <label class="form-label" for="order_tag"><?php echo __('tag_id'); ?> *</label>
+                <label class="form-label" for="order_tag">Tag ID / ٹیگ آئی ڈی *</label>
                 <input type="text" name="tag_id" id="order_tag" class="form-control" required readonly value="<?php echo $newTagId; ?>">
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="cust_select"><?php echo __('select_customer'); ?> *</label>
+                <label class="form-label" for="cust_select">Select Customer / گاہک منتخب کریں *</label>
                 <select name="customer_id" id="cust_select" class="form-control" required>
-                    <option value=""><?php echo __('select_customer'); ?>...</option>
+                    <option value="">Select Customer / گاہک منتخب کریں...</option>
                     <?php foreach ($customersList as $cust): ?>
                         <option value="<?php echo $cust['id']; ?>"><?php echo htmlspecialchars($cust['name']); ?> (<?php echo htmlspecialchars($cust['phone']); ?>)</option>
                     <?php endforeach; ?>
@@ -782,7 +824,7 @@ require_once 'includes/header.php';
             <div class="form-group">
                 <label class="form-label" for="assigned_karigar">Assign Karigar / کاریگر متعین کریں</label>
                 <select name="assigned_to" id="assigned_karigar" class="form-control">
-                    <option value="">Select Karigar (Optional)...</option>
+                    <option value="">Select Karigar / کاریگر منتخب کریں (Optional)...</option>
                     <?php foreach ($karigarsList as $k): ?>
                         <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['username']); ?></option>
                     <?php endforeach; ?>
@@ -791,10 +833,10 @@ require_once 'includes/header.php';
             
             <!-- ZERO-COST FABRIC IMAGE UPLOAD BRIDGE -->
             <div class="glass-card" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 20px;">
-                <h4 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">📷 Fabric Image Upload Bridge</h4>
+                <h4 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">📷 Fabric Image Upload Bridge / کپڑے کی تصویر کا لنک</h4>
                 <div style="display: flex; gap: 15px; align-items: center;">
                     <button type="button" onclick="startUploadBridgeSession()" id="btn-init-bridge" class="btn-glass" style="font-size: 13px; border-color: var(--neon-cyan); color: var(--neon-cyan);">
-                        Generate Upload QR Link
+                        Generate Upload QR Link / کیو آر کوڈ بنائیں
                     </button>
                     <div id="bridge-status-text" style="font-size: 12px; color: var(--text-muted);">No upload bridge session active.</div>
                 </div>
@@ -816,23 +858,23 @@ require_once 'includes/header.php';
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
-                    <label class="form-label" for="order_price"><?php echo __('price'); ?></label>
+                    <label class="form-label" for="order_price">Price (Rs) / کل رقم</label>
                     <input type="number" step="0.01" name="price" id="order_price" class="form-control" placeholder="0.00" value="0.00">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="order_advance"><?php echo __('advance'); ?></label>
+                    <label class="form-label" for="order_advance">Advance Paid (Rs) / پیشگی رقم</label>
                     <input type="number" step="0.01" name="advance" id="order_advance" class="form-control" placeholder="0.00" value="0.00">
                 </div>
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="order_notes"><?php echo __('notes'); ?></label>
+                <label class="form-label" for="order_notes">Notes / خصوصی ہدایات</label>
                 <textarea name="notes" id="order_notes" rows="2" class="form-control" placeholder="e.g. Double stitching, short collar..."></textarea>
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button type="submit" class="btn-glass btn-neon-cyan" style="flex: 1; justify-content: center;"><?php echo __('new_order'); ?></button>
-                <button type="button" onclick="closeModal('modal-order')" class="btn-glass" style="flex: 1; justify-content: center;"><?php echo __('cancel'); ?></button>
+                <button type="submit" class="btn-glass btn-neon-cyan" style="flex: 1; justify-content: center;">Create Order / نیا آرڈر درج کریں</button>
+                <button type="button" onclick="closeModal('modal-order')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel / منسوخ کریں</button>
             </div>
         </form>
     </div>

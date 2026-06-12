@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `tag_id` VARCHAR(50) NOT NULL,
   `measurements_snapshot` JSON DEFAULT NULL,
   `fabric_image` VARCHAR(255) DEFAULT NULL,
-  `status` ENUM('received', 'cutting', 'stitching', 'ready') DEFAULT 'received',
+  `status` ENUM('received', 'cutting', 'stitching', 'ready', 'dispatched') DEFAULT 'received',
   `notes` TEXT DEFAULT NULL,
   `price` DECIMAL(10,2) DEFAULT '0.00',
   `advance_paid` DECIMAL(10,2) DEFAULT '0.00',

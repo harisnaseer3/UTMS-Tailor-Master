@@ -29,7 +29,7 @@ if (!$input) {
 $orderId = $input['order_id'] ?? null;
 $newStatus = $input['status'] ?? '';
 
-$allowedStatuses = ['received', 'cutting', 'stitching', 'ready'];
+$allowedStatuses = ['received', 'cutting', 'stitching', 'ready', 'dispatched'];
 
 if (empty($orderId) || !in_array($newStatus, $allowedStatuses)) {
     echo json_encode(['success' => false, 'error' => 'Invalid order ID or status value']);
