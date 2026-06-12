@@ -108,6 +108,27 @@ $statuses = [
                                         Rs. <?php echo number_format($order['price'] - $order['advance_paid'], 2); ?>
                                     </span>
                                 </div>
+                                
+                                <!-- Assign Karigar -->
+                                <?php if (isset($karigarsList) && is_array($karigarsList)): ?>
+                                    <div style="margin-bottom: 10px;">
+                                        <select class="form-control" style="font-size: 11px; padding: 4px; height: auto;" onchange="assignOrderToKarigar(<?php echo $order['id']; ?>, this.value)">
+                                            <option value="">Assign Karigar...</option>
+                                            <?php foreach ($karigarsList as $k): ?>
+                                                <option value="<?php echo $k['id']; ?>" <?php echo ($order['assigned_to'] == $k['id']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($k['username']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                <?php endif; ?>
+                            <?php else: ?>
+                                <!-- Show Assigned Karigar Name for Karigars themselves if needed, or just let Master see it. Actually it's useful for everyone to see. -->
+                                <?php if (!empty($order['karigar_name'])): ?>
+                                    <div style="font-size: 11px; color: var(--neon-cyan); margin-bottom: 8px;">
+                                        🛠️ Assigned: <?php echo htmlspecialchars($order['karigar_name']); ?>
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                             
                             <!-- Quick action buttons to transition columns on mobile -->

@@ -47,10 +47,12 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `notes` TEXT DEFAULT NULL,
   `price` DECIMAL(10,2) DEFAULT '0.00',
   `advance_paid` DECIMAL(10,2) DEFAULT '0.00',
+  `assigned_to` INT DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_tag` (`tag_id`),
   CONSTRAINT `fk_orders_shop` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_orders_customer` FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_orders_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. Upload Sessions (Zero-Cost Image Upload Bridge)

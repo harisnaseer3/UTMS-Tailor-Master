@@ -25,7 +25,7 @@ function closeModal(id) {
 // Open Sizing Vault Modal & populate values
 function openVaultModal(customer) {
     document.getElementById('vault_customer_id').value = customer.id;
-    document.getElementById('vault-title').innerText = `📐 Edit Measurements: ${customer.name}`;
+    document.getElementById('vault-title').innerText = `📐 Edit Measurements / پیمائش تبدیل کریں: ${customer.name}`;
     
     // Parse measurements JSON
     let measurements = {};
@@ -135,6 +135,35 @@ function updateOrderStatus(orderId, status) {
     .catch(err => {
         console.error("Status update error", err);
         showToast("⚠️ Network error updating status");
+    });
+}
+
+// AJAX Karigar Assignment
+function assignOrderToKarigar(orderId, karigarId) {
+    fetch('api/update_order_karigar.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            order_id: orderId,
+            karigar_id: karigarId
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            showToast("Order assigned to Karigar successfully!");
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showToast(`⚠️ Error: ${data.error || 'Failed to assign'}`);
+        }
+    })
+    .catch(err => {
+        console.error("Assignment error", err);
+        showToast("⚠️ Network error assigning Karigar");
     });
 }
 

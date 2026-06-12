@@ -62,6 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
         $notes = trim($_POST['notes'] ?? '');
         $tagId = trim($_POST['tag_id'] ?? '');
         $session_id = trim($_POST['bridge_session_id'] ?? ''); // Bridge photo connection
+        $assignedTo = !empty($_POST['assigned_to']) ? intval($_POST['assigned_to']) : null;
         
         if (empty($customerId) || empty($tagId)) {
             $_SESSION['error_msg'] = 'Customer and Tag ID are required.';
@@ -90,8 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                         }
                     }
 
-                    $stmt = $pdo->prepare("INSERT INTO orders (shop_id, customer_id, tag_id, measurements_snapshot, fabric_image, status, notes, price, advance_paid) VALUES (?, ?, ?, ?, ?, 'received', ?, ?, ?)");
-                    $stmt->execute([$shopId, $customerId, $tagId, $measurements, $fabricImage, $notes, $price, $advance]);
+                    $stmt = $pdo->prepare("INSERT INTO orders (shop_id, customer_id, tag_id, measurements_snapshot, fabric_image, status, notes, price, advance_paid, assigned_to) VALUES (?, ?, ?, ?, ?, 'received', ?, ?, ?, ?)");
+                    $stmt->execute([$shopId, $customerId, $tagId, $measurements, $fabricImage, $notes, $price, $advance, $assignedTo]);
                     
                     $_SESSION['success_msg'] = 'Order created successfully.';
                 } catch (PDOException $e) {
@@ -139,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
 // Fetch dashboard statistics & records depending on Role
 $customersList = [];
 $ordersList = [];
+$karigarsList = [];
 $kanbanOrders = [
     'received' => [],
     'cutting' => [],
@@ -155,11 +157,12 @@ $stats = [
 if ($role === 'master' || $role === 'karigar') {
     // Both Master and Karigar need order data. Scoped strictly by shop_id.
     
-    // Get Orders Scoped by shop_id
+    // Get Orders Scoped by shop_id (with assigned Karigar info)
     $stmtOrders = $pdo->prepare("
-        SELECT o.*, c.name as customer_name, c.phone as customer_phone 
+        SELECT o.*, c.name as customer_name, c.phone as customer_phone, u.username as karigar_name 
         FROM orders o 
         JOIN customers c ON o.customer_id = c.id 
+        LEFT JOIN users u ON o.assigned_to = u.id 
         WHERE o.shop_id = ? 
         ORDER BY o.created_at DESC
     ");
@@ -193,6 +196,11 @@ if ($role === 'master' || $role === 'karigar') {
         $stmtCusts = $pdo->prepare("SELECT * FROM customers WHERE shop_id = ? ORDER BY name ASC");
         $stmtCusts->execute([$shopId]);
         $customersList = $stmtCusts->fetchAll();
+
+        // Fetch Karigars Scoped by shop_id
+        $stmtKarigars = $pdo->prepare("SELECT * FROM users WHERE shop_id = ? AND role = 'karigar' ORDER BY username ASC");
+        $stmtKarigars->execute([$shopId]);
+        $karigarsList = $stmtKarigars->fetchAll();
     }
 } elseif ($role === 'customer') {
     // Customer Scoped Dashboard
@@ -257,6 +265,7 @@ require_once 'includes/header.php';
             <p style="color: var(--text-secondary);"><?php echo __('tagline'); ?> &bull; Shop ID: <?php echo $shopId; ?></p>
         </div>
         <div style="display: flex; gap: 12px;">
+            <button onclick="openModal('modal-staff')" class="btn-glass btn-neon-gold">+ Add Karigar / کاریگر</button>
             <button onclick="openModal('modal-customer')" class="btn-glass btn-neon-orchid">+ <?php echo __('add_customer'); ?></button>
             <button onclick="openModal('modal-order')" class="btn-glass btn-neon-cyan">+ <?php echo __('new_order'); ?></button>
         </div>
@@ -323,24 +332,28 @@ require_once 'includes/header.php';
                             <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 1, 'text', this)">
                                 <?php echo __('phone'); ?> <span class="sort-arrow">⇅</span>
                             </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 2, 'date', this)">
+                                <?php echo __('date'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
                             <th style="padding: 10px 5px; text-align: right;"><?php echo __('actions'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($customersList)): ?>
-                            <tr><td colspan="3" style="padding: 20px; text-align: center; color: var(--text-muted);">No customers registered yet.</td></tr>
+                            <tr><td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">No customers registered yet.</td></tr>
                         <?php else: ?>
                             <?php foreach ($customersList as $cust): ?>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
                                     <td style="padding: 12px 5px; font-weight: 500;"><?php echo htmlspecialchars($cust['name']); ?></td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo htmlspecialchars($cust['phone']); ?></td>
+                                    <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($cust['created_at'])); ?></td>
                                     <td style="padding: 12px 5px; text-align: right;">
                                         <button onclick='openVaultModal(<?php echo json_encode($cust); ?>)' class="btn-glass" style="padding: 4px 8px; font-size: 12px; border-color: var(--neon-cyan); color: var(--neon-cyan);">
                                             📏 <?php echo __('measurements'); ?>
                                         </button>
                                     </td>
                                 </tr>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -369,11 +382,14 @@ require_once 'includes/header.php';
                             <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 3, 'number', this)">
                                 <?php echo __('balance'); ?> <span class="sort-arrow">⇅</span>
                             </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 4, 'date', this)">
+                                <?php echo __('date'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($ordersList)): ?>
-                            <tr><td colspan="4" style="padding: 20px; text-align: center; color: var(--text-muted);">No financial entries.</td></tr>
+                            <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">No financial entries.</td></tr>
                         <?php else: ?>
                             <?php foreach ($ordersList as $ord): ?>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
@@ -383,6 +399,7 @@ require_once 'includes/header.php';
                                     <td style="padding: 12px 5px; font-weight: 500; color: <?php echo ($ord['price'] - $ord['advance_paid'] > 0) ? 'var(--neon-gold)' : 'var(--neon-emerald)'; ?>">
                                         Rs. <?php echo number_format($ord['price'] - $ord['advance_paid'], 2); ?>
                                     </td>
+                                    <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($ord['created_at'])); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -537,6 +554,9 @@ require_once 'includes/header.php';
                 // Extract numeric value (strip "Rs.", commas, spaces)
                 valA = parseFloat(valA.replace(/[^0-9.\-]/g, '')) || 0;
                 valB = parseFloat(valB.replace(/[^0-9.\-]/g, '')) || 0;
+            } else if (type === 'date') {
+                valA = new Date(valA).getTime() || 0;
+                valB = new Date(valB).getTime() || 0;
             } else {
                 valA = valA.toLowerCase();
                 valB = valB.toLowerCase();
@@ -590,8 +610,8 @@ require_once 'includes/header.php';
             <!-- Sizing Vault -->
             <div class="glass-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">
-                    <h3 style="color: var(--neon-orchid); font-size: 18px;">📐 Personal Sizing Vault</h3>
-                    <span style="font-size: 12px; color: var(--text-muted);">Self-Editable Profile</span>
+                    <h3 style="color: var(--neon-orchid); font-size: 18px;">📐 Personal Sizing Vault / ذاتی پیمائش کا والٹ</h3>
+                    <span style="font-size: 12px; color: var(--text-muted);">Self-Editable Profile / خود قابلِ ترمیم پروفائل</span>
                 </div>
                 
                 <form action="api/save_measurements.php" method="POST" id="vault-edit-form">
@@ -604,7 +624,7 @@ require_once 'includes/header.php';
                     ?>
                     
                     <button type="submit" class="btn-glass btn-neon-orchid" style="width: 100%; justify-content: center; padding: 12px; margin-top: 20px;">
-                        💾 Save Sizing Measurements
+                        💾 Save Sizing Measurements / پیمائش محفوظ کریں
                     </button>
                 </form>
             </div>
@@ -668,6 +688,39 @@ require_once 'includes/header.php';
 
 <!-- ==================== MODALS (MASTER ROLE) ==================== -->
 
+<!-- 0. Add Karigar/Staff Modal -->
+<div id="modal-staff" class="modal-overlay">
+    <div class="modal-content glass-card" style="max-width: 450px;">
+        <h3 style="color: var(--neon-gold); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            🛠️ Add Karigar / کاریگر شامل کریں
+        </h3>
+        <form action="dashboard.php" method="POST">
+            <input type="hidden" name="action" value="add_staff">
+            <input type="hidden" name="role" value="karigar">
+            
+            <div class="form-group">
+                <label class="form-label" for="staff_username">Username / کاریگر کا نام *</label>
+                <input type="text" name="username" id="staff_username" class="form-control" required placeholder="karigar_ahmed">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="staff_password">Password / پاس ورڈ *</label>
+                <input type="password" name="password" id="staff_password" class="form-control" required placeholder="••••••••">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="staff_phone">Phone Number / فون نمبر</label>
+                <input type="text" name="phone" id="staff_phone" class="form-control" placeholder="03001234567">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button type="submit" class="btn-glass btn-neon-gold" style="flex: 1; justify-content: center;">Add Karigar / کاریگر شامل کریں</button>
+                <button type="button" onclick="closeModal('modal-staff')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel / منسوخ کریں</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- 1. Add Customer Modal -->
 <div id="modal-customer" class="modal-overlay">
     <div class="modal-content glass-card" style="max-width: 450px;">
@@ -716,6 +769,16 @@ require_once 'includes/header.php';
                     <option value=""><?php echo __('select_customer'); ?>...</option>
                     <?php foreach ($customersList as $cust): ?>
                         <option value="<?php echo $cust['id']; ?>"><?php echo htmlspecialchars($cust['name']); ?> (<?php echo htmlspecialchars($cust['phone']); ?>)</option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="assigned_karigar">Assign Karigar / کاریگر متعین کریں</label>
+                <select name="assigned_to" id="assigned_karigar" class="form-control">
+                    <option value="">Select Karigar (Optional)...</option>
+                    <?php foreach ($karigarsList as $k): ?>
+                        <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['username']); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -773,7 +836,7 @@ require_once 'includes/header.php';
 <div id="modal-vault" class="modal-overlay">
     <div class="modal-content glass-card" style="max-width: 600px;">
         <h3 id="vault-title" style="color: var(--neon-orchid); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
-            📐 Edit Sizing Vault measurements
+            📐 Edit Sizing Vault measurements / پیمائش تبدیل کریں
         </h3>
         
         <form action="api/save_measurements.php" method="POST" id="vault-form">
@@ -794,8 +857,8 @@ require_once 'includes/header.php';
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button type="submit" class="btn-glass btn-neon-orchid" style="flex: 1; justify-content: center;"><?php echo __('save'); ?></button>
-                <button type="button" onclick="closeModal('modal-vault')" class="btn-glass" style="flex: 1; justify-content: center;"><?php echo __('cancel'); ?></button>
+                <button type="submit" class="btn-glass btn-neon-orchid" style="flex: 1; justify-content: center;">Save Changes / محفوظ کریں</button>
+                <button type="button" onclick="closeModal('modal-vault')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel / منسوخ کریں</button>
             </div>
         </form>
     </div>

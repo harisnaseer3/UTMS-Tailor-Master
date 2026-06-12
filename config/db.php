@@ -53,6 +53,17 @@ function getDBConnection() {
         } catch (PDOException $e) {
             // Table might not exist or alter already done
         }
+
+        // Auto-migration to allow assigning orders to karigar (users table)
+        try {
+            $checkColumn = $pdo->query("SHOW COLUMNS FROM `orders` LIKE 'assigned_to'");
+            if ($tableCheck->rowCount() > 0 && $checkColumn->rowCount() === 0) {
+                $pdo->exec("ALTER TABLE `orders` ADD COLUMN `assigned_to` INT DEFAULT NULL");
+                $pdo->exec("ALTER TABLE `orders` ADD CONSTRAINT `fk_orders_assigned` FOREIGN KEY (`assigned_to`) REFERENCES `users`(`id`) ON DELETE SET NULL");
+            }
+        } catch (PDOException $e) {
+            // Table might not exist or alter already done
+        }
         
         return $pdo;
     } catch (PDOException $e) {
