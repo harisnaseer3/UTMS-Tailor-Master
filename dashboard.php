@@ -281,7 +281,7 @@ require_once 'includes/header.php';
         <div class="glass-card stat-card">
             <div>
                 <span class="form-label" style="margin: 0;"><?php echo __('total_revenue'); ?></span>
-                <div class="stat-val" style="color: var(--neon-emerald);">Rs. <?php echo number_format($stats['revenue'], 2); ?></div>
+                <div class="stat-val" style="color: var(--neon-emerald);">Rs. <?php echo number_format($stats['revenue'], 0); ?></div>
             </div>
             <div class="stat-icon revenue">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.251.11a3.375 3.375 0 003.498 0L13 12m-3-2.818l.251-.11a3.375 3.375 0 013.498 0L17 12m-7.141 3.536L12 16.5m0-9v9" /></svg>
@@ -299,7 +299,7 @@ require_once 'includes/header.php';
         <div class="glass-card stat-card">
             <div>
                 <span class="form-label" style="margin: 0;"><?php echo __('outstanding'); ?></span>
-                <div class="stat-val" style="color: var(--neon-gold);">Rs. <?php echo number_format($stats['balance'], 2); ?></div>
+                <div class="stat-val" style="color: var(--neon-gold);">Rs. <?php echo number_format($stats['balance'], 0); ?></div>
             </div>
             <div class="stat-icon balance">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 24px;"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
@@ -443,9 +443,9 @@ require_once 'includes/header.php';
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
                                     <td style="padding: 12px 5px; font-weight: bold; color: var(--neon-cyan);"><?php echo htmlspecialchars($ord['tag_id']); ?></td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo htmlspecialchars($ord['customer_name']); ?></td>
-                                    <td style="padding: 12px 5px;">Rs. <?php echo number_format($ord['price'], 2); ?></td>
+                                    <td style="padding: 12px 5px;">Rs. <?php echo number_format($ord['price'], 0); ?></td>
                                     <td style="padding: 12px 5px; font-weight: 500; color: <?php echo ($ord['price'] - $ord['advance_paid'] > 0) ? 'var(--neon-gold)' : 'var(--neon-emerald)'; ?>">
-                                        Rs. <?php echo number_format($ord['price'] - $ord['advance_paid'], 2); ?>
+                                        Rs. <?php echo number_format($ord['price'] - $ord['advance_paid'], 0); ?>
                                     </td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($ord['created_at'])); ?></td>
                                     <td style="padding: 12px 5px; text-align: right;">

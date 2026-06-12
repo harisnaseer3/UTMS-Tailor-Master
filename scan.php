@@ -71,6 +71,8 @@ require_once 'includes/header.php';
                 <?php elseif ($order['status'] === 'dispatched'): ?>
                     <span style="color: #6b7280; font-size: 13px; border: 1px solid #6b7280; padding: 3px 10px; border-radius: 12px; background: rgba(107,114,128,0.1); font-weight: bold;"><?php echo __('status_dispatched'); ?></span>
                 <?php endif; ?>
+                
+                    <button onclick="window.history.back()" style="background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 0 0 0 10px; transition: all 0.2s ease;" onmouseover="this.style.color='#ef4444'; this.style.transform='translateY(-3px)'; this.style.fontWeight='900';" onmouseout="this.style.color='var(--text-muted)'; this.style.transform='translateY(0)'; this.style.fontWeight='normal';" title="Go Back">✕</button>
                 </div>
             </div>
 
@@ -112,30 +114,30 @@ require_once 'includes/header.php';
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Upper Length</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo floatval($upper['length'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['length'] ?? 0); ?>"</strong>
                     </div>
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Shoulder</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo floatval($upper['shoulder'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['shoulder'] ?? 0); ?>"</strong>
                     </div>
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Chest/Bust</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo floatval($upper['chest'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['chest'] ?? 0); ?>"</strong>
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; margin-top: 12px;">
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Lower Length</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo floatval($lower['length'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['length'] ?? 0); ?>"</strong>
                     </div>
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Waist</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo floatval($lower['waist'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['waist'] ?? 0); ?>"</strong>
                     </div>
                     <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
                         <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Bottom Opening</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo floatval($lower['bottom_opening'] ?? 0); ?>"</strong>
+                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['bottom_opening'] ?? 0); ?>"</strong>
                     </div>
                 </div>
             </div>

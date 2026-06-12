@@ -206,22 +206,22 @@ $lower = $measurements['lower'] ?? [];
         <div class="section-title">Measurements</div>
         <div class="measurements-grid">
             <?php if (!empty($upper['length'])): ?>
-                <div class="measurement-item"><span>Up. Length:</span> <strong><?php echo floatval($upper['length']); ?>"</strong></div>
+                <div class="measurement-item"><span>Up. Length:</span> <strong><?php echo intval($upper['length']); ?>"</strong></div>
             <?php endif; ?>
             <?php if (!empty($upper['shoulder'])): ?>
-                <div class="measurement-item"><span>Shoulder:</span> <strong><?php echo floatval($upper['shoulder']); ?>"</strong></div>
+                <div class="measurement-item"><span>Shoulder:</span> <strong><?php echo intval($upper['shoulder']); ?>"</strong></div>
             <?php endif; ?>
             <?php if (!empty($upper['chest'])): ?>
-                <div class="measurement-item"><span>Chest:</span> <strong><?php echo floatval($upper['chest']); ?>"</strong></div>
+                <div class="measurement-item"><span>Chest:</span> <strong><?php echo intval($upper['chest']); ?>"</strong></div>
             <?php endif; ?>
             <?php if (!empty($lower['length'])): ?>
-                <div class="measurement-item"><span>Low. Length:</span> <strong><?php echo floatval($lower['length']); ?>"</strong></div>
+                <div class="measurement-item"><span>Low. Length:</span> <strong><?php echo intval($lower['length']); ?>"</strong></div>
             <?php endif; ?>
             <?php if (!empty($lower['waist'])): ?>
-                <div class="measurement-item"><span>Waist:</span> <strong><?php echo floatval($lower['waist']); ?>"</strong></div>
+                <div class="measurement-item"><span>Waist:</span> <strong><?php echo intval($lower['waist']); ?>"</strong></div>
             <?php endif; ?>
             <?php if (!empty($lower['bottom_opening'])): ?>
-                <div class="measurement-item"><span>Bottom:</span> <strong><?php echo floatval($lower['bottom_opening']); ?>"</strong></div>
+                <div class="measurement-item"><span>Bottom:</span> <strong><?php echo intval($lower['bottom_opening']); ?>"</strong></div>
             <?php endif; ?>
         </div>
         <?php endif; ?>
@@ -234,15 +234,15 @@ $lower = $measurements['lower'] ?? [];
         <div class="financials">
             <div class="row">
                 <span>Total Amount:</span>
-                <span>Rs. <?php echo number_format($order['price'], 2); ?></span>
+                <span>Rs. <?php echo number_format($order['price'], 0); ?></span>
             </div>
             <div class="row">
                 <span>Advance Paid:</span>
-                <span>Rs. <?php echo number_format($order['advance_paid'], 2); ?></span>
+                <span>Rs. <?php echo number_format($order['advance_paid'], 0); ?></span>
             </div>
             <div class="row total">
                 <span>Balance Due:</span>
-                <span>Rs. <?php echo number_format($order['price'] - $order['advance_paid'], 2); ?></span>
+                <span>Rs. <?php echo number_format($order['price'] - $order['advance_paid'], 0); ?></span>
             </div>
         </div>
 
