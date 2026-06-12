@@ -352,6 +352,28 @@ a:hover {
     font-weight: bold;
 }
 
+.column-cards-container.scrollable-column {
+    max-height: 750px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+/* Custom scrollbar for cards container */
+.column-cards-container.scrollable-column::-webkit-scrollbar {
+    width: 6px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-thumb {
+    background: rgba(147, 51, 234, 0.3);
+    border-radius: 3px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+}
+
 /* Kanban Cards */
 .kanban-card {
     background: rgba(18, 14, 38, 0.85);

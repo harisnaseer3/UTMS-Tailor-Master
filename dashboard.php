@@ -309,13 +309,20 @@ require_once 'includes/header.php';
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px;">
         <!-- Customers Directory -->
         <div class="glass-card">
-            <h3 style="margin-bottom: 15px; font-size: 18px; color: var(--neon-orchid);">👥 <?php echo __('customers'); ?></h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--neon-orchid);">👥 <?php echo __('customers'); ?></h3>
+                <input type="text" id="customers-search" placeholder="Search customers..." oninput="filterTable('customers-table', this.value)" style="width: 180px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+            </div>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <table id="customers-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 13px;">
-                            <th style="padding: 10px 5px;"><?php echo __('customer_name'); ?></th>
-                            <th style="padding: 10px 5px;"><?php echo __('phone'); ?></th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 0, 'text', this)">
+                                <?php echo __('customer_name'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 1, 'text', this)">
+                                <?php echo __('phone'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
                             <th style="padding: 10px 5px; text-align: right;"><?php echo __('actions'); ?></th>
                         </tr>
                     </thead>
@@ -342,15 +349,26 @@ require_once 'includes/header.php';
 
         <!-- Financial Ledger -->
         <div class="glass-card">
-            <h3 style="margin-bottom: 15px; font-size: 18px; color: var(--neon-gold);">💰 <?php echo __('ledger'); ?></h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--neon-gold);">💰 <?php echo __('ledger'); ?></h3>
+                <input type="text" id="ledger-search" placeholder="Search ledger..." oninput="filterTable('ledger-table', this.value)" style="width: 180px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+            </div>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <table id="ledger-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
                         <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary); font-size: 13px;">
-                            <th style="padding: 10px 5px;"><?php echo __('tag_id'); ?></th>
-                            <th style="padding: 10px 5px;"><?php echo __('customer_name'); ?></th>
-                            <th style="padding: 10px 5px;"><?php echo __('price'); ?></th>
-                            <th style="padding: 10px 5px;"><?php echo __('balance'); ?></th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 0, 'text', this)">
+                                <?php echo __('tag_id'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 1, 'text', this)">
+                                <?php echo __('customer_name'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 2, 'number', this)">
+                                <?php echo __('price'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 3, 'number', this)">
+                                <?php echo __('balance'); ?> <span class="sort-arrow">⇅</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -373,6 +391,176 @@ require_once 'includes/header.php';
             </div>
         </div>
     </div>
+
+    <script>
+    // Generic client-side pagination
+    function paginateTable(tableId, recordsPerPage = 10) {
+        var table = document.getElementById(tableId);
+        if (!table) return;
+        
+        var pagContainer = document.getElementById(tableId + '-pagination');
+        if (!pagContainer) {
+            pagContainer = document.createElement('div');
+            pagContainer.id = tableId + '-pagination';
+            pagContainer.style.display = 'flex';
+            pagContainer.style.justifyContent = 'center';
+            pagContainer.style.gap = '8px';
+            pagContainer.style.marginTop = '15px';
+            pagContainer.style.alignItems = 'center';
+            table.parentNode.appendChild(pagContainer);
+        }
+        
+        var currentPage = parseInt(table.getAttribute('data-current-page') || '1');
+        var tbody = table.querySelector('tbody');
+        var allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+        
+        // If table has empty/placeholder row, don't paginate
+        if (allRows.length === 1 && allRows[0].cells.length <= 1 && allRows[0].textContent.indexOf('No ') !== -1) {
+            pagContainer.innerHTML = '';
+            return;
+        }
+        
+        // Filter rows that match search query
+        var searchVal = '';
+        var searchInput = document.getElementById(tableId === 'customers-table' ? 'customers-search' : 'ledger-search');
+        if (searchInput) {
+            searchVal = searchInput.value.trim().toLowerCase();
+        }
+        
+        var matchedRows = allRows.filter(function(row) {
+            if (searchVal === '') return true;
+            return row.textContent.toLowerCase().indexOf(searchVal) !== -1;
+        });
+        
+        var totalRecords = matchedRows.length;
+        var totalPages = Math.ceil(totalRecords / recordsPerPage);
+        
+        if (totalRecords <= recordsPerPage) {
+            pagContainer.innerHTML = '';
+            // Reset display style for search matchings
+            allRows.forEach(function(row) {
+                if (searchVal === '') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = (row.textContent.toLowerCase().indexOf(searchVal) !== -1) ? '' : 'none';
+                }
+            });
+            return;
+        }
+        
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        table.setAttribute('data-current-page', currentPage);
+        
+        // Hide all rows
+        allRows.forEach(function(row) {
+            row.style.display = 'none';
+        });
+        
+        // Show matched rows for the current page
+        var start = (currentPage - 1) * recordsPerPage;
+        var end = start + recordsPerPage;
+        matchedRows.slice(start, end).forEach(function(row) {
+            row.style.display = '';
+        });
+        
+        // Render pagination buttons
+        var html = '';
+        html += '<button type="button" class="btn-glass" style="padding: 4px 10px; font-size: 12px; margin: 0;' + (currentPage === 1 ? ' opacity: 0.5; cursor: not-allowed;' : '') + '" ' + (currentPage === 1 ? 'disabled' : 'onclick="changeTablePage(\'' + tableId + '\', ' + (currentPage - 1) + ')"') + '>&larr; Prev</button>';
+        html += '<span style="font-size: 13px; color: var(--text-secondary); min-width: 80px; text-align: center;">Page ' + currentPage + ' of ' + totalPages + '</span>';
+        html += '<button type="button" class="btn-glass" style="padding: 4px 10px; font-size: 12px; margin: 0;' + (currentPage === totalPages ? ' opacity: 0.5; cursor: not-allowed;' : '') + '" ' + (currentPage === totalPages ? 'disabled' : 'onclick="changeTablePage(\'' + tableId + '\', ' + (currentPage + 1) + ')"') + '>Next &rarr;</button>';
+        
+        pagContainer.innerHTML = html;
+    }
+
+    function changeTablePage(tableId, newPage) {
+        var table = document.getElementById(tableId);
+        if (!table) return;
+        table.setAttribute('data-current-page', newPage);
+        paginateTable(tableId);
+    }
+
+    // Live search filter for any table
+    function filterTable(tableId, query) {
+        var table = document.getElementById(tableId);
+        if (!table) return;
+        
+        // Reset to page 1 on search and re-paginate
+        table.setAttribute('data-current-page', '1');
+        paginateTable(tableId);
+    }
+
+    // Sort table by column
+    function sortTable(tableId, colIndex, type, thEl) {
+        var table = document.getElementById(tableId);
+        if (!table) return;
+        var tbody = table.querySelector('tbody');
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+
+        // Determine sort direction
+        var currentDir = thEl.getAttribute('data-sort-dir') || 'none';
+        var newDir = (currentDir === 'asc') ? 'desc' : 'asc';
+
+        // Reset all arrows in this table's header
+        var allTh = table.querySelectorAll('thead th .sort-arrow');
+        for (var a = 0; a < allTh.length; a++) {
+            allTh[a].textContent = '⇅';
+        }
+        // Set active arrow
+        var arrow = thEl.querySelector('.sort-arrow');
+        if (arrow) {
+            arrow.textContent = (newDir === 'asc') ? '↑' : '↓';
+        }
+        thEl.setAttribute('data-sort-dir', newDir);
+
+        // Reset other th sort directions
+        var allHeaders = table.querySelectorAll('thead th');
+        for (var h = 0; h < allHeaders.length; h++) {
+            if (allHeaders[h] !== thEl) {
+                allHeaders[h].setAttribute('data-sort-dir', 'none');
+            }
+        }
+
+        rows.sort(function(a, b) {
+            var cellA = a.cells[colIndex];
+            var cellB = b.cells[colIndex];
+            if (!cellA || !cellB) return 0;
+
+            var valA = cellA.textContent.trim();
+            var valB = cellB.textContent.trim();
+
+            if (type === 'number') {
+                // Extract numeric value (strip "Rs.", commas, spaces)
+                valA = parseFloat(valA.replace(/[^0-9.\-]/g, '')) || 0;
+                valB = parseFloat(valB.replace(/[^0-9.\-]/g, '')) || 0;
+            } else {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+
+            if (valA < valB) return newDir === 'asc' ? -1 : 1;
+            if (valA > valB) return newDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        // Re-append sorted rows
+        for (var r = 0; r < rows.length; r++) {
+            tbody.appendChild(rows[r]);
+        }
+        
+        // Re-paginate sorted rows
+        paginateTable(tableId);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        paginateTable('customers-table');
+        paginateTable('ledger-table');
+    });
+    </script>
 
 <?php elseif ($role === 'karigar'): ?>
     <!-- ==================== KARIGAR DASHBOARD ==================== -->

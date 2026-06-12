@@ -29,6 +29,30 @@ $statuses = [
 ];
 ?>
 
+<style>
+.column-cards-container.scrollable-column {
+    max-height: 750px !important;
+    overflow-y: auto !important;
+    padding-right: 6px;
+}
+
+/* Custom scrollbar for cards container */
+.column-cards-container.scrollable-column::-webkit-scrollbar {
+    width: 6px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 3px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-thumb {
+    background: rgba(147, 51, 234, 0.3);
+    border-radius: 3px;
+}
+.column-cards-container.scrollable-column::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+}
+</style>
+
 
     <div class="kanban-container">
     <?php foreach ($statuses as $statusKey => $statusMeta): ?>
@@ -41,7 +65,11 @@ $statuses = [
                 <input type="text" class="kanban-col-search" placeholder="Search by name..." oninput="filterColumnCards('<?php echo $statusKey; ?>', this.value)" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
             </div>
             
-            <div class="column-cards-container" style="min-height: 400px;">
+            <?php 
+            $orders = $kanbanOrders[$statusKey] ?? [];
+            $hasScroll = count($orders) > 3;
+            ?>
+            <div class="column-cards-container<?php echo $hasScroll ? ' scrollable-column' : ''; ?>" style="min-height: 400px;">
                 <?php if (empty($kanbanOrders[$statusKey])): ?>
                     <div class="kanban-empty-placeholder" style="text-align: center; color: var(--text-muted); font-size: 12px; padding: 40px 0; border: 1px dashed rgba(255,255,255,0.02); border-radius: 8px;">
                         Drop here
