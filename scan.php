@@ -56,9 +56,11 @@ require_once 'includes/header.php';
                     <span class="card-tag" style="font-size: 14px; padding: 4px 10px;"><?php echo htmlspecialchars($order['tag_id']); ?></span>
                     <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;"><?php echo htmlspecialchars($order['shop_name']); ?></div>
                 </div>
-                
-                <!-- Active Status Badge -->
-                <?php if ($order['status'] === 'received'): ?>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <a href="print_receipt.php?id=<?php echo urlencode($order['tag_id']); ?>" target="_blank" class="btn-glass" style="font-size: 12px; padding: 4px 10px; border-color: var(--neon-cyan); color: var(--neon-cyan); text-decoration: none;" title="Print Receipt">🖨️ Print</a>
+                    
+                    <!-- Active Status Badge -->
+                    <?php if ($order['status'] === 'received'): ?>
                     <span style="color: var(--neon-gold); font-size: 13px; border: 1px solid var(--neon-gold); padding: 3px 10px; border-radius: 12px; background: rgba(255,184,0,0.1); font-weight: bold;"><?php echo __('status_received'); ?></span>
                 <?php elseif ($order['status'] === 'cutting'): ?>
                     <span style="color: var(--neon-orchid); font-size: 13px; border: 1px solid var(--neon-orchid); padding: 3px 10px; border-radius: 12px; background: rgba(184,41,242,0.1); font-weight: bold;"><?php echo __('status_cutting'); ?></span>
@@ -67,6 +69,7 @@ require_once 'includes/header.php';
                 <?php elseif ($order['status'] === 'ready'): ?>
                     <span style="color: var(--neon-emerald); font-size: 13px; border: 1px solid var(--neon-emerald); padding: 3px 10px; border-radius: 12px; background: rgba(13,242,138,0.1); font-weight: bold;"><?php echo __('status_ready'); ?></span>
                 <?php endif; ?>
+                </div>
             </div>
 
             <!-- Customer Details (Masked for Karigars/Guests) -->

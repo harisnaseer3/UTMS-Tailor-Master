@@ -111,8 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
         $roleSelected = $_POST['role'] ?? 'karigar';
         $phone = trim($_POST['phone'] ?? '');
         
-        if (empty($username) || empty($password)) {
-            $_SESSION['error_msg'] = 'Username and password are required.';
+        // Karigars do not need a password from the UI, auto-generate one
+        if (empty($password)) {
+            $password = bin2hex(random_bytes(16));
+        }
+        
+        if (empty($username)) {
+            $_SESSION['error_msg'] = 'Username is required.';
         } elseif (!in_array($roleSelected, ['karigar', 'master'])) {
             $_SESSION['error_msg'] = 'Invalid role selected.';
         } else {
@@ -385,11 +390,12 @@ require_once 'includes/header.php';
                             <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('ledger-table', 4, 'date', this)">
                                 <?php echo __('date'); ?> <span class="sort-arrow">⇅</span>
                             </th>
+                            <th style="padding: 10px 5px; text-align: right;"><?php echo __('actions'); ?></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($ordersList)): ?>
-                            <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">No financial entries.</td></tr>
+                            <tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">No financial entries.</td></tr>
                         <?php else: ?>
                             <?php foreach ($ordersList as $ord): ?>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
@@ -400,6 +406,9 @@ require_once 'includes/header.php';
                                         Rs. <?php echo number_format($ord['price'] - $ord['advance_paid'], 2); ?>
                                     </td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($ord['created_at'])); ?></td>
+                                    <td style="padding: 12px 5px; text-align: right;">
+                                        <a href="print_receipt.php?id=<?php echo urlencode($ord['tag_id']); ?>" target="_blank" class="btn-glass" style="padding: 4px 8px; font-size: 11px; text-decoration: none;" title="Print Receipt">🖨️</a>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -703,10 +712,7 @@ require_once 'includes/header.php';
                 <input type="text" name="username" id="staff_username" class="form-control" required placeholder="karigar_ahmed">
             </div>
             
-            <div class="form-group">
-                <label class="form-label" for="staff_password">Password / پاس ورڈ *</label>
-                <input type="password" name="password" id="staff_password" class="form-control" required placeholder="••••••••">
-            </div>
+            <!-- Password field removed as Karigars do not login directly -->
             
             <div class="form-group">
                 <label class="form-label" for="staff_phone">Phone Number / فون نمبر</label>
