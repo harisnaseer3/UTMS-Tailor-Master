@@ -136,12 +136,13 @@ function seedInitialData($pdo) {
         ]
     ];
     
-    $stmtCustomer = $pdo->prepare("INSERT INTO customers (shop_id, user_id, name, phone, measurements) VALUES (?, ?, ?, ?, ?)");
+    $stmtCustomer = $pdo->prepare("INSERT INTO customers (shop_id, user_id, name, phone, gender, measurements) VALUES (?, ?, ?, ?, ?, ?)");
     $stmtCustomer->execute([
         $shopId1,
         $customerUserId,
         "Ali Khan",
         "03005556666",
+        "male",
         json_encode($defaultMeasurements)
     ]);
     $customerId = $pdo->lastInsertId();

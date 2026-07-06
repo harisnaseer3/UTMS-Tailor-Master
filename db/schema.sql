@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `customers` (
   `user_id` INT DEFAULT NULL,
   `name` VARCHAR(100) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
+  `gender` ENUM('male', 'female') NOT NULL DEFAULT 'male',
   `measurements` JSON DEFAULT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT `fk_customers_shop` FOREIGN KEY (`shop_id`) REFERENCES `shops`(`id`) ON DELETE CASCADE,

@@ -27,15 +27,19 @@ function openVaultModal(customer) {
     document.getElementById('vault_customer_id').value = customer.id;
     document.getElementById('vault-title').innerText = `📐 Edit Measurements / پیمائش تبدیل کریں: ${customer.name}`;
     
-    // Parse measurements JSON
     let measurements = {};
     try {
-        measurements = typeof customer.measurements === 'string' 
-            ? JSON.parse(customer.measurements) 
-            : customer.measurements;
+        if (customer.measurements) {
+            measurements = typeof customer.measurements === 'string' 
+                ? JSON.parse(customer.measurements) 
+                : customer.measurements;
+        }
     } catch(e) {
         console.error("Failed to parse measurements JSON", e);
     }
+    
+    // Ensure measurements is an object, not null
+    measurements = measurements || {};
     
     const upper = measurements.upper || {};
     const lower = measurements.lower || {};
@@ -61,6 +65,12 @@ function openVaultModal(customer) {
     document.getElementById('m_lo_rise').value = lower.rise || 0;
     document.getElementById('m_lo_bottom_opening').value = lower.bottom_opening || 0;
     document.getElementById('m_lo_inseam').value = lower.inseam || 0;
+    
+    // Toggle women's specific fields based on gender
+    const womensFields = document.getElementById('m_womens-specific-fields');
+    if (womensFields) {
+        womensFields.style.display = (customer.gender === 'female') ? '' : 'none';
+    }
     
     openModal('modal-vault');
 }
@@ -328,6 +338,63 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Customer select change event for order modal
+    const custSelect = document.getElementById('cust_select');
+    if (custSelect) {
+        custSelect.addEventListener('change', (e) => {
+            const customerId = e.target.value;
+            const measContainer = document.getElementById('order-measurements-container');
+            
+            if (!customerId) {
+                measContainer.style.display = 'none';
+                return;
+            }
+            
+            // Show the container
+            measContainer.style.display = 'block';
+            
+            fetch(`api/get_customer.php?id=${customerId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const upper = data.measurements.upper || {};
+                    const lower = data.measurements.lower || {};
+                    
+                    document.getElementById('o_up_length').value = upper.length || 0;
+                    document.getElementById('o_up_shoulder').value = upper.shoulder || 0;
+                    document.getElementById('o_up_chest').value = upper.chest || 0;
+                    document.getElementById('o_up_armhole').value = upper.armhole || 0;
+                    document.getElementById('o_up_sleeve').value = upper.sleeve || 0;
+                    document.getElementById('o_up_neck').value = upper.neck || 0;
+                    document.getElementById('o_up_hem_width').value = upper.hem_width || 0;
+                    document.getElementById('o_up_darts').value = upper.darts || 'No';
+                    document.getElementById('o_up_cut').value = upper.cut || 'Straight';
+                    document.getElementById('o_up_flare').value = upper.flare || 0;
+                    document.getElementById('o_up_upper_chest').value = upper.upper_chest || 0;
+                    document.getElementById('o_up_lower_chest').value = upper.lower_chest || 0;
+                    
+                    document.getElementById('o_lo_length').value = lower.length || 0;
+                    document.getElementById('o_lo_waist').value = lower.waist || 0;
+                    document.getElementById('o_lo_hips').value = lower.hips || 0;
+                    document.getElementById('o_lo_rise').value = lower.rise || 0;
+                    document.getElementById('o_lo_bottom_opening').value = lower.bottom_opening || 0;
+                    document.getElementById('o_lo_inseam').value = lower.inseam || 0;
+                    
+                    const womensFields = document.getElementById('o_womens-specific-fields');
+                    if (womensFields) {
+                        womensFields.style.display = (data.gender === 'female') ? '' : 'none';
+                    }
+                } else {
+                    showToast('⚠️ Could not load customer measurements.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('⚠️ Network error fetching measurements.');
+            });
+        });
+    }
 });
 
 // ==================== THEME SWITCHER ====================

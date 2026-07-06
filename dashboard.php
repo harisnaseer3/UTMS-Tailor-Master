@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
     if (isset($_POST['action']) && $_POST['action'] === 'add_customer') {
         $name = trim($_POST['name'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $gender = trim($_POST['gender'] ?? 'male');
         
         if (empty($name) || empty($phone)) {
             $_SESSION['error_msg'] = 'Customer name and phone number are required.';
@@ -42,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                         ]
                     ];
                     
-                    $stmt = $pdo->prepare("INSERT INTO customers (shop_id, name, phone, measurements) VALUES (?, ?, ?, ?)");
-                    $stmt->execute([$shopId, $name, $phone, json_encode($emptyTree)]);
+                    $stmt = $pdo->prepare("INSERT INTO customers (shop_id, name, phone, gender, measurements) VALUES (?, ?, ?, ?, ?)");
+                    $stmt->execute([$shopId, $name, $phone, $gender, json_encode($emptyTree)]);
                     $_SESSION['success_msg'] = 'Customer profile added successfully.';
                 } catch (PDOException $e) {
                     $_SESSION['error_msg'] = 'Error saving customer: ' . $e->getMessage();
@@ -74,11 +75,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                 $_SESSION['error_msg'] = 'This Tag ID is already assigned to another order.';
             } else {
                 try {
-                    // Get customer's current measurements to snap into order
-                    $stmtCust = $pdo->prepare("SELECT measurements FROM customers WHERE id = ? AND shop_id = ?");
-                    $stmtCust->execute([$customerId, $shopId]);
-                    $cust = $stmtCust->fetch();
-                    $measurements = $cust ? $cust['measurements'] : json_encode([]);
+                    // Update customer's measurements based on submitted form
+                    $upper = isset($_POST['upper']) && is_array($_POST['upper']) ? $_POST['upper'] : [];
+                    $lower = isset($_POST['lower']) && is_array($_POST['lower']) ? $_POST['lower'] : [];
+                    $newMeasurements = [
+                        'upper' => $upper,
+                        'lower' => $lower
+                    ];
+                    $measurementsJson = json_encode($newMeasurements);
+
+                    // Update the customer record with the new measurements
+                    $stmtUpdateCust = $pdo->prepare("UPDATE customers SET measurements = ? WHERE id = ? AND shop_id = ?");
+                    $stmtUpdateCust->execute([$measurementsJson, $customerId, $shopId]);
+
                     
                     // Check if fabric photo was uploaded via mobile bridge session
                     $fabricImage = null;
@@ -92,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                     }
 
                     $stmt = $pdo->prepare("INSERT INTO orders (shop_id, customer_id, tag_id, measurements_snapshot, fabric_image, status, notes, price, advance_paid, assigned_to) VALUES (?, ?, ?, ?, ?, 'received', ?, ?, ?, ?)");
-                    $stmt->execute([$shopId, $customerId, $tagId, $measurements, $fabricImage, $notes, $price, $advance, $assignedTo]);
+                    $stmt->execute([$shopId, $customerId, $tagId, $measurementsJson, $fabricImage, $notes, $price, $advance, $assignedTo]);
                     
                     $_SESSION['success_msg'] = 'Order created successfully.';
                 } catch (PDOException $e) {
@@ -788,6 +797,14 @@ require_once 'includes/header.php';
                 <input type="text" name="phone" id="cust_phone" class="form-control" required placeholder="03001234567">
             </div>
             
+            <div class="form-group">
+                <label class="form-label" for="cust_gender">Gender / جنس *</label>
+                <select name="gender" id="cust_gender" class="form-control" required>
+                    <option value="male">Male (Gents) / مرد</option>
+                    <option value="female">Female (Ladies) / خواتین</option>
+                </select>
+            </div>
+            
             <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button type="submit" class="btn-glass btn-neon-orchid" style="flex: 1; justify-content: center;">Save / محفوظ کریں</button>
                 <button type="button" onclick="closeModal('modal-customer')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel / منسوخ کریں</button>
@@ -830,6 +847,17 @@ require_once 'includes/header.php';
                     <?php endforeach; ?>
                 </select>
             </div>
+            
+            <!-- MEASUREMENTS SECTION INSIDE ORDER FORM -->
+            <div id="order-measurements-container" style="display: none; margin-top: 15px; margin-bottom: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                <?php 
+                    $idPrefix = 'o_';
+                    $measurements = ["upper" => [], "lower" => []];
+                    $isFemale = false; // Default until JS sets it
+                    include 'views/measurement_inputs.php'; 
+                ?>
+            </div>
+            
             
             <!-- ZERO-COST FABRIC IMAGE UPLOAD BRIDGE -->
             <div class="glass-card" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 20px;">
@@ -896,6 +924,7 @@ require_once 'includes/header.php';
                 <!-- We will include the template statically and populate values using JS -->
                 <?php 
                     // Render the inputs. We will set inputs value manually via JavaScript.
+                    $idPrefix = 'm_';
                     $measurements = [
                         "upper" => [],
                         "lower" => []
