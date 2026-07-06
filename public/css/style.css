@@ -642,9 +642,19 @@ select.form-control option {
     
     .nav-links {
         width: 100%;
+        display: flex;
+        flex-direction: row;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 10px;
+    }
+    
+    .nav-links > span.text-muted {
+        width: 100%;
+        text-align: center;
+        order: -1; /* Forces the text to appear above the buttons */
+        margin-bottom: 5px;
+        display: block;
     }
 
     .responsive-header-flex {
