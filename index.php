@@ -72,7 +72,9 @@ if (isLoggedIn()) {
 
         <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
             <a href="login.php" class="btn-glass">Regular Sign In</a>
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin'): ?>
             <a href="register.php" class="btn-glass btn-neon-cyan">Register New Shop</a>
+            <?php endif; ?>
         </div>
     </div>
 </div>

@@ -9,7 +9,7 @@
             &copy; <?php echo date('Y'); ?> <?php echo __('title'); ?>. All Rights Reserved.
         </div>
         <div>
-            Designed with <span style="color: var(--neon-orchid);">&hearts;</span> (AetherThread UI)
+            Developed by <span style="color: var(--neon-orchid);">&hearts;</span> (Haris Naseer Satti)
         </div>
     </div>
 </footer>

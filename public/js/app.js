@@ -57,6 +57,14 @@ function openVaultModal(customer) {
     document.getElementById('m_up_flare').value = upper.flare || 0;
     document.getElementById('m_up_upper_chest').value = upper.upper_chest || 0;
     document.getElementById('m_up_lower_chest').value = upper.lower_chest || 0;
+    document.getElementById('m_up_fitting').value = upper.fitting || 0;
+    document.getElementById('m_up_chowk').value = upper.chowk || 0;
+    
+    // Populate notes
+    const notesEl = document.getElementById('m_measurement_notes');
+    if (notesEl) {
+        notesEl.value = measurements.notes || '';
+    }
     
     // Populate lower body inputs
     document.getElementById('m_lo_length').value = lower.length || 0;
@@ -342,6 +350,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // Customer select change event for order modal
     const custSelect = document.getElementById('cust_select');
     if (custSelect) {
+        // Initialize Tom Select for searchable dropdown
+        if (typeof TomSelect !== 'undefined') {
+            new TomSelect(custSelect, {
+                create: false,
+                sortField: {
+                    field: "text",
+                    direction: "asc"
+                }
+            });
+        }
+        
         custSelect.addEventListener('change', (e) => {
             const customerId = e.target.value;
             const measContainer = document.getElementById('order-measurements-container');

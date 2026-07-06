@@ -78,9 +78,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                     // Update customer's measurements based on submitted form
                     $upper = isset($_POST['upper']) && is_array($_POST['upper']) ? $_POST['upper'] : [];
                     $lower = isset($_POST['lower']) && is_array($_POST['lower']) ? $_POST['lower'] : [];
+                    $measurementNotes = trim($_POST['measurement_notes'] ?? '');
+                    
                     $newMeasurements = [
                         'upper' => $upper,
-                        'lower' => $lower
+                        'lower' => $lower,
+                        'notes' => $measurementNotes
                     ];
                     $measurementsJson = json_encode($newMeasurements);
 
@@ -145,6 +148,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                     $_SESSION['error_msg'] = 'Error saving staff: ' . $e->getMessage();
                 }
             }
+        }
+        header("Location: dashboard.php");
+        exit();
+    }
+}
+
+// Handle Super Admin POST actions
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $role === 'super_admin') {
+    if (isset($_POST['action']) && $_POST['action'] === 'delete_shop') {
+        $deleteShopId = intval($_POST['delete_shop_id'] ?? 0);
+        if ($deleteShopId > 0) {
+            try {
+                $stmt = $pdo->prepare("DELETE FROM shops WHERE id = ?");
+                $stmt->execute([$deleteShopId]);
+                $_SESSION['success_msg'] = 'Workshop successfully deleted.';
+            } catch (PDOException $e) {
+                $_SESSION['error_msg'] = 'Error deleting workshop: ' . $e->getMessage();
+            }
+        }
+        header("Location: dashboard.php");
+        exit();
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'edit_shop') {
+        $editShopId = intval($_POST['edit_shop_id'] ?? 0);
+        $shopName = trim($_POST['shop_name'] ?? '');
+        $shopPhone = trim($_POST['shop_phone'] ?? '');
+        
+        if ($editShopId > 0 && !empty($shopName)) {
+            try {
+                $stmt = $pdo->prepare("UPDATE shops SET name = ?, phone = ? WHERE id = ?");
+                $stmt->execute([$shopName, $shopPhone, $editShopId]);
+                $_SESSION['success_msg'] = 'Workshop successfully updated.';
+            } catch (PDOException $e) {
+                $_SESSION['error_msg'] = 'Error updating workshop: ' . $e->getMessage();
+            }
+        } else {
+            $_SESSION['error_msg'] = 'Shop name is required.';
         }
         header("Location: dashboard.php");
         exit();
@@ -261,6 +300,15 @@ if ($role === 'master' || $role === 'karigar') {
             $ordersList = [];
         }
     }
+} elseif ($role === 'super_admin') {
+    // Super Admin Scoped Dashboard
+    $superStats = [
+        'shops' => $pdo->query("SELECT COUNT(id) FROM shops")->fetchColumn(),
+        'users' => $pdo->query("SELECT COUNT(id) FROM users")->fetchColumn(),
+        'customers' => $pdo->query("SELECT COUNT(id) FROM customers")->fetchColumn(),
+        'orders' => $pdo->query("SELECT COUNT(id) FROM orders")->fetchColumn()
+    ];
+    $shopsList = $pdo->query("SELECT * FROM shops ORDER BY created_at DESC")->fetchAll();
 }
 
 // Auto-generate Tag ID for new orders (e.g. YEAR-XXXX)
@@ -418,10 +466,34 @@ require_once 'includes/header.php';
 
         <!-- Financial Ledger -->
         <div class="glass-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0; font-size: 18px; color: var(--neon-gold);">💰 <?php echo __('ledger'); ?></h3>
-                <input type="text" id="ledger-search" placeholder="Search ledger..." oninput="filterTable('ledger-table', this.value)" style="width: 180px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="margin: 0; font-size: 18px; color: var(--neon-gold); min-width: 150px;">💰 <?php echo __('ledger'); ?></h3>
+                
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label for="ledger-start" style="color: var(--text-secondary); font-size: 12px;">From:</label>
+                        <input type="date" id="ledger-start" class="form-control" onchange="filterTable('ledger-table')" style="padding: 4px 8px; font-size: 12px; height: 30px;">
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <label for="ledger-end" style="color: var(--text-secondary); font-size: 12px;">To:</label>
+                        <input type="date" id="ledger-end" class="form-control" onchange="filterTable('ledger-table')" style="padding: 4px 8px; font-size: 12px; height: 30px;">
+                    </div>
+                    <input type="text" id="ledger-search" placeholder="Search ledger..." oninput="filterTable('ledger-table', this.value)" style="width: 150px; font-size: 12px; padding: 6px 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+                </div>
             </div>
+            
+            <!-- Dynamic Ledger Totals -->
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div class="glass-card stat-card" style="padding: 10px 15px; flex: 1; border-color: rgba(13,242,138,0.3);">
+                    <span class="form-label" style="margin: 0; font-size: 12px;">Received Amount (Filtered)</span>
+                    <div class="stat-val" id="filter-received" style="color: var(--neon-emerald); font-size: 18px;">Rs. 0</div>
+                </div>
+                <div class="glass-card stat-card" style="padding: 10px 15px; flex: 1; border-color: rgba(255,184,0,0.3);">
+                    <span class="form-label" style="margin: 0; font-size: 12px;">Remaining Balance (Filtered)</span>
+                    <div class="stat-val" id="filter-balance" style="color: var(--neon-gold); font-size: 18px;">Rs. 0</div>
+                </div>
+            </div>
+
             <div style="overflow-x: auto;">
                 <table id="ledger-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                     <thead>
@@ -504,10 +576,47 @@ require_once 'includes/header.php';
             searchVal = searchInput.value.trim().toLowerCase();
         }
         
+        var startFilter = document.getElementById('ledger-start') ? document.getElementById('ledger-start').value : '';
+        var endFilter = document.getElementById('ledger-end') ? document.getElementById('ledger-end').value : '';
+        var startDate = startFilter ? new Date(startFilter) : null;
+        var endDate = endFilter ? new Date(endFilter) : null;
+        if (startDate) startDate.setHours(0,0,0,0);
+        if (endDate) endDate.setHours(23,59,59,999);
+
+        var totalReceived = 0;
+        var totalBalance = 0;
+
         var matchedRows = allRows.filter(function(row) {
-            if (searchVal === '') return true;
-            return row.textContent.toLowerCase().indexOf(searchVal) !== -1;
+            if (searchVal !== '' && row.textContent.toLowerCase().indexOf(searchVal) === -1) {
+                return false;
+            }
+            
+            if (tableId === 'ledger-table' && row.cells.length > 4) {
+                if (startDate || endDate) {
+                    var dateStr = row.cells[4].innerText.trim();
+                    var rowDate = new Date(dateStr);
+                    rowDate.setHours(12,0,0,0);
+                    if (startDate && rowDate < startDate) return false;
+                    if (endDate && rowDate > endDate) return false;
+                }
+                
+                var priceStr = row.cells[2].innerText.replace(/[^0-9]/g, '');
+                var balStr = row.cells[3].innerText.replace(/[^0-9]/g, '');
+                var price = parseInt(priceStr) || 0;
+                var bal = parseInt(balStr) || 0;
+                totalReceived += (price - bal);
+                totalBalance += bal;
+            }
+            
+            return true;
         });
+        
+        if (tableId === 'ledger-table') {
+            var recEl = document.getElementById('filter-received');
+            var balEl = document.getElementById('filter-balance');
+            if (recEl) recEl.innerText = 'Rs. ' + totalReceived.toLocaleString();
+            if (balEl) balEl.innerText = 'Rs. ' + totalBalance.toLocaleString();
+        }
         
         var totalRecords = matchedRows.length;
         var totalPages = Math.ceil(totalRecords / recordsPerPage);
@@ -743,6 +852,80 @@ require_once 'includes/header.php';
         </div>
     <?php endif; ?>
 
+<?php elseif ($role === 'super_admin'): ?>
+    <!-- ==================== SUPER ADMIN DASHBOARD ==================== -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h2 style="font-size: 28px; font-weight: 700; color: var(--neon-orchid);">👑 Super Admin Dashboard</h2>
+            <p style="color: var(--text-secondary);">System-wide overview and management.</p>
+        </div>
+        <div>
+            <a href="register.php" class="btn-glass btn-neon-orchid">+ Register New Workshop</a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="dashboard-grid">
+        <div class="glass-card stat-card">
+            <div>
+                <span class="form-label" style="margin: 0;">Total Workshops</span>
+                <div class="stat-val" style="color: var(--neon-cyan);"><?php echo $superStats['shops']; ?></div>
+            </div>
+        </div>
+        <div class="glass-card stat-card">
+            <div>
+                <span class="form-label" style="margin: 0;">Total Users</span>
+                <div class="stat-val" style="color: var(--neon-orchid);"><?php echo $superStats['users']; ?></div>
+            </div>
+        </div>
+        <div class="glass-card stat-card">
+            <div>
+                <span class="form-label" style="margin: 0;">Total Customers</span>
+                <div class="stat-val" style="color: var(--neon-gold);"><?php echo $superStats['customers']; ?></div>
+            </div>
+        </div>
+        <div class="glass-card stat-card">
+            <div>
+                <span class="form-label" style="margin: 0;">Total Orders</span>
+                <div class="stat-val" style="color: var(--neon-emerald);"><?php echo $superStats['orders']; ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shops Table -->
+    <div class="glass-card" style="margin-top: 30px;">
+        <h3 style="margin-bottom: 15px; font-size: 20px; color: var(--neon-cyan);">Registered Workshops</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-secondary);">
+                    <th style="padding: 10px;">ID</th>
+                    <th style="padding: 10px;">Shop Name</th>
+                    <th style="padding: 10px;">Phone</th>
+                    <th style="padding: 10px;">Registered On</th>
+                    <th style="padding: 10px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($shopsList as $shop): ?>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td style="padding: 10px;"><?php echo $shop['id']; ?></td>
+                    <td style="padding: 10px; font-weight: bold;"><?php echo htmlspecialchars($shop['name']); ?></td>
+                    <td style="padding: 10px;"><?php echo htmlspecialchars($shop['phone']); ?></td>
+                    <td style="padding: 10px;"><?php echo date('M d, Y', strtotime($shop['created_at'])); ?></td>
+                    <td style="padding: 10px; text-align: right;">
+                        <button type="button" class="btn-glass" onclick='openEditShopModal(<?php echo json_encode($shop); ?>)' style="padding: 4px 8px; font-size: 12px; border-color: var(--neon-gold); color: var(--neon-gold); margin-right: 5px;">✏️ Edit</button>
+                        <form action="dashboard.php" method="POST" onsubmit="return confirm('Are you sure you want to completely delete this workshop and ALL its associated users, customers, and orders? This cannot be undone.');" style="display:inline;">
+                            <input type="hidden" name="action" value="delete_shop">
+                            <input type="hidden" name="delete_shop_id" value="<?php echo $shop['id']; ?>">
+                            <button type="submit" class="btn-glass" style="padding: 4px 8px; font-size: 12px; border-color: red; color: red;">🗑️ Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
 <?php endif; ?>
 
 
@@ -815,7 +998,7 @@ require_once 'includes/header.php';
 
 <!-- 2. Create Order Modal with QR Fabric upload bridge -->
 <div id="modal-order" class="modal-overlay">
-    <div class="modal-content glass-card" style="max-width: 550px;">
+    <div class="modal-content glass-card" style="max-width: 900px; width: 95%;">
         <h3 style="color: var(--neon-cyan); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             📦 Create Order / نیا آرڈر درج کریں
         </h3>
@@ -823,29 +1006,31 @@ require_once 'includes/header.php';
             <input type="hidden" name="action" value="create_order">
             <input type="hidden" name="bridge_session_id" id="bridge_session_id" value="">
             
-            <div class="form-group">
-                <label class="form-label" for="order_tag">Tag ID / ٹیگ آئی ڈی *</label>
-                <input type="text" name="tag_id" id="order_tag" class="form-control" required readonly value="<?php echo $newTagId; ?>">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="cust_select">Select Customer / گاہک منتخب کریں *</label>
-                <select name="customer_id" id="cust_select" class="form-control" required>
-                    <option value="">Select Customer / گاہک منتخب کریں...</option>
-                    <?php foreach ($customersList as $cust): ?>
-                        <option value="<?php echo $cust['id']; ?>"><?php echo htmlspecialchars($cust['name']); ?> (<?php echo htmlspecialchars($cust['phone']); ?>)</option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label" for="assigned_karigar">Assign Karigar / کاریگر متعین کریں</label>
-                <select name="assigned_to" id="assigned_karigar" class="form-control">
-                    <option value="">Select Karigar / کاریگر منتخب کریں (Optional)...</option>
-                    <?php foreach ($karigarsList as $k): ?>
-                        <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['username']); ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
+                <div class="form-group" style="margin-bottom: 5px;">
+                    <label class="form-label" for="order_tag">Tag ID / ٹیگ آئی ڈی *</label>
+                    <input type="text" name="tag_id" id="order_tag" class="form-control" required readonly value="<?php echo $newTagId; ?>">
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 5px;">
+                    <label class="form-label" for="cust_select">Select Customer / گاہک منتخب کریں *</label>
+                    <select name="customer_id" id="cust_select" class="form-control" required>
+                        <option value="">Select Customer / گاہک منتخب کریں...</option>
+                        <?php foreach ($customersList as $cust): ?>
+                            <option value="<?php echo $cust['id']; ?>"><?php echo htmlspecialchars($cust['name']); ?> (<?php echo htmlspecialchars($cust['phone']); ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 5px;">
+                    <label class="form-label" for="assigned_karigar">Assign Karigar / کاریگر متعین کریں</label>
+                    <select name="assigned_to" id="assigned_karigar" class="form-control">
+                        <option value="">Select Karigar / کاریگر منتخب کریں (Optional)...</option>
+                        <?php foreach ($karigarsList as $k): ?>
+                            <option value="<?php echo $k['id']; ?>"><?php echo htmlspecialchars($k['username']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
             
             <!-- MEASUREMENTS SECTION INSIDE ORDER FORM -->
@@ -910,7 +1095,7 @@ require_once 'includes/header.php';
 
 <!-- 3. Edit Measurements Modal for Master -->
 <div id="modal-vault" class="modal-overlay">
-    <div class="modal-content glass-card" style="max-width: 600px;">
+    <div class="modal-content glass-card" style="max-width: 900px; width: 95%;">
         <h3 id="vault-title" style="color: var(--neon-orchid); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             📐 Edit Sizing Vault measurements / پیمائش تبدیل کریں
         </h3>
@@ -940,6 +1125,46 @@ require_once 'includes/header.php';
         </form>
     </div>
 </div>
+
+<!-- ==================== MODALS (SUPER ADMIN ROLE) ==================== -->
+<?php if ($role === 'super_admin'): ?>
+<!-- Edit Shop Modal -->
+<div id="modal-edit-shop" class="modal-overlay">
+    <div class="modal-content glass-card" style="max-width: 450px;">
+        <h3 style="color: var(--neon-gold); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
+            ✏️ Edit Workshop
+        </h3>
+        <form action="dashboard.php" method="POST">
+            <input type="hidden" name="action" value="edit_shop">
+            <input type="hidden" name="edit_shop_id" id="edit_shop_id" value="">
+            
+            <div class="form-group">
+                <label class="form-label" for="edit_shop_name">Shop Name *</label>
+                <input type="text" name="shop_name" id="edit_shop_name" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="edit_shop_phone">Shop Phone</label>
+                <input type="text" name="shop_phone" id="edit_shop_phone" class="form-control">
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button type="submit" class="btn-glass btn-neon-gold" style="flex: 1; justify-content: center;">Save Changes</button>
+                <button type="button" onclick="closeModal('modal-edit-shop')" class="btn-glass" style="flex: 1; justify-content: center;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditShopModal(shop) {
+    document.getElementById('edit_shop_id').value = shop.id;
+    document.getElementById('edit_shop_name').value = shop.name || '';
+    document.getElementById('edit_shop_phone').value = shop.phone || '';
+    openModal('modal-edit-shop');
+}
+</script>
+<?php endif; ?>
 
 <?php
 require_once 'includes/footer.php';

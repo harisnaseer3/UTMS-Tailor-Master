@@ -64,8 +64,8 @@ function loginUser($username, $password, $shopId = null) {
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND shop_id = ?");
         $stmt->execute([$username, $shopId]);
     } else {
-        // Customer login does not specify a shop
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND role = 'customer'");
+        // Customer or Super Admin login does not specify a shop
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND (role = 'customer' OR role = 'super_admin')");
         $stmt->execute([$username]);
     }
     

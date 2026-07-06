@@ -3,19 +3,18 @@
 require_once 'config/db.php';
 require_once 'includes/auth.php';
 
-// Redirect if already logged in
-if (isLoggedIn()) {
+// Redirect if already logged in, unless super admin
+if (isLoggedIn() && $_SESSION['role'] !== 'super_admin') {
     header("Location: dashboard.php");
     exit();
 }
+$isSuperAdmin = isLoggedIn() && $_SESSION['role'] === 'super_admin';
 
 $errorMsg = '';
 $successMsg = '';
 
 // Handle Registration Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $regMode = $_POST['reg_mode'] ?? 'shop';
-    
     if ($regMode === 'customer') {
         $fullName = trim($_POST['customer_fullname'] ?? '');
         $username = trim($_POST['customer_username'] ?? '');
@@ -76,6 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } else {
+        if (!$isSuperAdmin) {
+            die("Unauthorized: Only super admins can register a new shop.");
+        }
         $shopName = trim($_POST['shop_name'] ?? '');
         $shopPhone = trim($_POST['shop_phone'] ?? '');
         $username = trim($_POST['username'] ?? '');
@@ -132,18 +134,21 @@ require_once 'includes/header.php';
         
         <!-- Modern Role Tabs -->
         <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px;">
+            <?php if ($isSuperAdmin): ?>
             <button type="button" id="tab-shop" onclick="setRegMode('shop')" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 2px solid var(--neon-orchid); color: var(--neon-orchid); font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
                 Register Shop
             </button>
-            <button type="button" id="tab-customer" onclick="setRegMode('customer')" style="flex: 1; padding: 10px; background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-secondary); font-weight: 500; cursor: pointer; transition: all 0.3s ease;">
+            <?php endif; ?>
+            <button type="button" id="tab-customer" onclick="setRegMode('customer')" style="flex: 1; padding: 10px; background: none; border: none; <?php echo $isSuperAdmin ? 'border-bottom: 2px solid transparent; color: var(--text-secondary);' : 'border-bottom: 2px solid var(--neon-gold); color: var(--neon-gold); font-weight: 600;'; ?> cursor: pointer; transition: all 0.3s ease;">
                 Register as Customer
             </button>
         </div>
 
         <form action="register.php" method="POST" id="reg-form">
-            <input type="hidden" name="reg_mode" id="reg_mode" value="shop">
+            <input type="hidden" name="reg_mode" id="reg_mode" value="<?php echo $isSuperAdmin ? 'shop' : 'customer'; ?>">
             
             <!-- Section 1: Shop Register Container -->
+            <?php if ($isSuperAdmin): ?>
             <div id="shop-reg-fields">
                 <h3 style="color: var(--neon-cyan); font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid rgba(0, 240, 255, 0.15); padding-bottom: 5px;">
                     1. Workshop Information
@@ -151,7 +156,7 @@ require_once 'includes/header.php';
                 
                 <div class="form-group">
                     <label class="form-label" for="shop_name"><?php echo __('shop_name'); ?> *</label>
-                    <input type="text" name="shop_name" id="shop_name" class="form-control" required placeholder="e.g. Royal Stitch Studio">
+                    <input type="text" name="shop_name" id="shop_name" class="form-control" <?php echo $isSuperAdmin ? 'required' : ''; ?> placeholder="e.g. Royal Stitch Studio">
                 </div>
                 
                 <div class="form-group">
@@ -165,13 +170,13 @@ require_once 'includes/header.php';
                 
                 <div class="form-group">
                     <label class="form-label" for="username">Master Username *</label>
-                    <input type="text" name="username" id="username" class="form-control" required placeholder="Desired username...">
+                    <input type="text" name="username" id="username" class="form-control" <?php echo $isSuperAdmin ? 'required' : ''; ?> placeholder="Desired username...">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label" for="password">Master Password *</label>
                     <div style="position: relative;">
-                        <input type="password" name="password" id="password" class="form-control" required placeholder="Create password..." style="padding-inline-end: 45px;">
+                        <input type="password" name="password" id="password" class="form-control" <?php echo $isSuperAdmin ? 'required' : ''; ?> placeholder="Create password..." style="padding-inline-end: 45px;">
                         <button type="button" onclick="togglePasswordVisibility('password', this)" style="position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;" title="Toggle Password Visibility">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -186,16 +191,17 @@ require_once 'includes/header.php';
                     <input type="text" name="phone" id="phone" class="form-control" placeholder="e.g. 03001234567">
                 </div>
             </div>
+            <?php endif; ?>
             
             <!-- Section 2: Customer Register Container -->
-            <div id="customer-reg-fields" style="display: none;">
+            <div id="customer-reg-fields" style="<?php echo $isSuperAdmin ? 'display: none;' : ''; ?>">
                 <h3 style="color: var(--neon-gold); font-size: 16px; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 184, 0, 0.15); padding-bottom: 5px;">
                     👤 Personal Information
                 </h3>
                 
                 <div class="form-group">
                     <label class="form-label" for="customer_fullname">Full Name *</label>
-                    <input type="text" name="customer_fullname" id="customer_fullname" class="form-control" placeholder="e.g. Ali Khan">
+                    <input type="text" name="customer_fullname" id="customer_fullname" class="form-control" <?php echo $isSuperAdmin ? '' : 'required'; ?> placeholder="e.g. Ali Khan">
                 </div>
                 
                 <div class="form-group">

@@ -102,7 +102,7 @@ require_once 'includes/header.php';
         </form>
         
         <div style="text-align: center; margin-top: 20px; font-size: 14px; color: var(--text-secondary);">
-            Don't have a workshop registered? <a href="register.php" style="font-weight: 500;"><?php echo __('register'); ?></a>
+            Don't have an account? <a href="register.php" style="font-weight: 500;">Register as Customer</a>
         </div>
     </div>
 </div>
@@ -111,6 +111,7 @@ require_once 'includes/header.php';
 function setLoginMode(mode) {
     const shopGroup = document.getElementById('shop-selection-group');
     const shopSelect = document.getElementById('shop_id');
+    const shopSearch = document.getElementById('shop_search');
     const loginModeInput = document.getElementById('login_mode');
     const tabStaff = document.getElementById('tab-staff');
     const tabCustomer = document.getElementById('tab-customer');
@@ -121,7 +122,9 @@ function setLoginMode(mode) {
     if (mode === 'customer') {
         shopGroup.style.display = 'none';
         shopSelect.removeAttribute('required');
+        shopSearch.removeAttribute('required');
         shopSelect.value = '';
+        shopSearch.value = '';
         
         tabCustomer.style.color = 'var(--neon-gold)';
         tabCustomer.style.borderBottomColor = 'var(--neon-gold)';
@@ -138,6 +141,7 @@ function setLoginMode(mode) {
     } else {
         shopGroup.style.display = 'block';
         shopSelect.setAttribute('required', 'required');
+        shopSearch.setAttribute('required', 'required');
         
         tabStaff.style.color = 'var(--neon-cyan)';
         tabStaff.style.borderBottomColor = 'var(--neon-cyan)';

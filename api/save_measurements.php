@@ -70,7 +70,9 @@ try {
         "cut" => htmlspecialchars($upperInput['cut'] ?? 'Straight'),
         "flare" => floatval($upperInput['flare'] ?? 0.0),
         "upper_chest" => floatval($upperInput['upper_chest'] ?? 0.0),
-        "lower_chest" => floatval($upperInput['lower_chest'] ?? 0.0)
+        "lower_chest" => floatval($upperInput['lower_chest'] ?? 0.0),
+        "fitting" => floatval($upperInput['fitting'] ?? 0.0),
+        "chowk" => floatval($upperInput['chowk'] ?? 0.0)
     ];
 
     // Clean lower body inputs
@@ -83,9 +85,12 @@ try {
         "inseam" => floatval($lowerInput['inseam'] ?? 0.0)
     ];
 
+    $measurementNotes = trim($_POST['measurement_notes'] ?? '');
+
     $measurementsJson = json_encode([
         "upper" => $upper,
-        "lower" => $lower
+        "lower" => $lower,
+        "notes" => $measurementNotes
     ]);
 
     // 3. Update Database

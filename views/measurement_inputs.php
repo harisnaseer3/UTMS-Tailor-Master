@@ -139,7 +139,7 @@ body.light-theme .measurement-input-wrapper label span:last-child {
 </div>
 
 <!-- Women's Specific Complexity Fields -->
-<div style="margin-bottom: 10px;">
+<div id="<?php echo $idPrefix; ?>womens-specific-fields" style="margin-bottom: 10px;">
     <h4 style="color: var(--neon-orchid); font-size: 15px; border-bottom: 1px solid rgba(184, 41, 242, 0.15); padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center;">
         <span>🎀 Women's Specific Fields</span>
         <span style="font-size: 13px; font-weight: normal; text-transform: none; font-family: var(--font-urdu);">خواتین کے لباس کی مخصوص تفصیلات</span>
@@ -184,5 +184,30 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="number" step="0.1" name="upper[lower_chest]" id="<?php echo $idPrefix; ?>up_lower_chest" value="<?php echo floatval($upper['lower_chest'] ?? 0); ?>">
         </div>
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_fitting" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Fitting</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">فٹنگ</span>
+            </label>
+            <input type="number" step="0.1" name="upper[fitting]" id="<?php echo $idPrefix; ?>up_fitting" value="<?php echo floatval($upper['fitting'] ?? 0); ?>">
+        </div>
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_chowk" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Chowk / Chak</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چاک</span>
+            </label>
+            <input type="number" step="0.1" name="upper[chowk]" id="<?php echo $idPrefix; ?>up_chowk" value="<?php echo floatval($upper['chowk'] ?? 0); ?>">
+        </div>
+    </div>
+</div>
+
+<!-- Measurement Notes -->
+<div style="margin-bottom: 10px;">
+    <h4 style="color: var(--neon-gold); font-size: 15px; border-bottom: 1px solid rgba(255, 184, 0, 0.15); padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center;">
+        <span>📝 Measurement Notes</span>
+        <span style="font-size: 13px; font-weight: normal; text-transform: none; font-family: var(--font-urdu);">پیمائش کے نوٹس / خاص ہدایات</span>
+    </h4>
+    <div class="form-group">
+        <textarea name="measurement_notes" id="<?php echo $idPrefix; ?>measurement_notes" class="form-control" rows="3" placeholder="Any specific requirements or things to keep in mind for this customer..."><?php echo htmlspecialchars($measurements['notes'] ?? ''); ?></textarea>
     </div>
 </div>
