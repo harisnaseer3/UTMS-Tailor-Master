@@ -13,16 +13,22 @@ $isSuperAdmin = isLoggedIn() && $_SESSION['role'] === 'super_admin';
 $errorMsg = '';
 $successMsg = '';
 
+// Determine registration mode from POST or default
+$regMode = $_POST['reg_mode'] ?? ($isSuperAdmin ? 'shop' : 'customer');
+
 // Handle Registration Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($regMode === 'customer') {
         $fullName = trim($_POST['customer_fullname'] ?? '');
         $username = trim($_POST['customer_username'] ?? '');
         $password = $_POST['customer_password'] ?? '';
+        $confirm_password = $_POST['customer_confirm_password'] ?? '';
         $phone = trim($_POST['customer_phone'] ?? '');
         
         if (empty($fullName) || empty($username) || empty($password) || empty($phone)) {
             $errorMsg = 'Full Name, Username, Password, and Mobile Number are required.';
+        } elseif ($password !== $confirm_password) {
+            $errorMsg = 'Passwords do not match.';
         } else {
             $pdo = getDBConnection();
             
@@ -82,10 +88,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $shopPhone = trim($_POST['shop_phone'] ?? '');
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
+        $confirm_password = $_POST['confirm_password'] ?? '';
         $phone = trim($_POST['phone'] ?? '');
         
         if (empty($shopName) || empty($username) || empty($password)) {
             $errorMsg = 'Shop Name, Master Username, and Password are required.';
+        } elseif ($password !== $confirm_password) {
+            $errorMsg = 'Passwords do not match.';
         } else {
             $pdo = getDBConnection();
             try {
@@ -187,6 +196,19 @@ require_once 'includes/header.php';
                 </div>
                 
                 <div class="form-group">
+                    <label class="form-label" for="confirm_password">Confirm Master Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" name="confirm_password" id="confirm_password" class="form-control" <?php echo $isSuperAdmin ? 'required' : ''; ?> placeholder="Confirm password..." style="padding-inline-end: 45px;">
+                        <button type="button" onclick="togglePasswordVisibility('confirm_password', this)" style="position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;" title="Toggle Password Visibility">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
                     <label class="form-label" for="phone">Personal Mobile Number</label>
                     <input type="text" name="phone" id="phone" class="form-control" placeholder="e.g. 03001234567">
                 </div>
@@ -230,6 +252,19 @@ require_once 'includes/header.php';
                         </button>
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="customer_confirm_password">Confirm Password *</label>
+                    <div style="position: relative;">
+                        <input type="password" name="customer_confirm_password" id="customer_confirm_password" class="form-control" placeholder="Confirm password..." style="padding-inline-end: 45px;">
+                        <button type="button" onclick="togglePasswordVisibility('customer_confirm_password', this)" style="position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;" title="Toggle Password Visibility">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <button type="submit" class="btn-glass btn-neon-orchid" id="reg_btn" style="width: 100%; justify-content: center; padding: 12px; margin-top: 15px;">
@@ -256,11 +291,13 @@ function setRegMode(mode) {
     const shopName = document.getElementById('shop_name');
     const username = document.getElementById('username');
     const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
     
     const customerFullname = document.getElementById('customer_fullname');
     const customerPhone = document.getElementById('customer_phone');
     const customerUsername = document.getElementById('customer_username');
     const customerPassword = document.getElementById('customer_password');
+    const customerConfirmPassword = document.getElementById('customer_confirm_password');
     
     regModeInput.value = mode;
     
@@ -272,11 +309,13 @@ function setRegMode(mode) {
         shopName.removeAttribute('required');
         username.removeAttribute('required');
         password.removeAttribute('required');
+        if (confirmPassword) confirmPassword.removeAttribute('required');
         
         customerFullname.setAttribute('required', 'required');
         customerPhone.setAttribute('required', 'required');
         customerUsername.setAttribute('required', 'required');
         customerPassword.setAttribute('required', 'required');
+        if (customerConfirmPassword) customerConfirmPassword.setAttribute('required', 'required');
         
         // Update Tabs style
         tabCustomer.style.color = 'var(--neon-gold)';
@@ -290,6 +329,7 @@ function setRegMode(mode) {
         regBtn.className = 'btn-glass';
         regBtn.style.borderColor = 'var(--neon-gold)';
         regBtn.style.color = 'var(--neon-gold)';
+        regBtn.innerHTML = 'Register Customer &rarr;';
     } else {
         shopFields.style.display = 'block';
         customerFields.style.display = 'none';
@@ -298,11 +338,13 @@ function setRegMode(mode) {
         shopName.setAttribute('required', 'required');
         username.setAttribute('required', 'required');
         password.setAttribute('required', 'required');
+        if (confirmPassword) confirmPassword.setAttribute('required', 'required');
         
         customerFullname.removeAttribute('required');
         customerPhone.removeAttribute('required');
         customerUsername.removeAttribute('required');
         customerPassword.removeAttribute('required');
+        if (customerConfirmPassword) customerConfirmPassword.removeAttribute('required');
         
         // Update Tabs style
         tabShop.style.color = 'var(--neon-orchid)';
@@ -316,6 +358,7 @@ function setRegMode(mode) {
         regBtn.className = 'btn-glass btn-neon-orchid';
         regBtn.style.borderColor = '';
         regBtn.style.color = '';
+        regBtn.innerHTML = 'Register Shop &rarr;';
     }
 }
 </script>

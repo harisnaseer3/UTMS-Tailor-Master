@@ -18,7 +18,7 @@ if (empty($tagId)) {
 } else {
     try {
         $stmt = $pdo->prepare("
-            SELECT o.*, c.name as customer_name, c.phone as customer_phone, s.name as shop_name, s.phone as shop_phone 
+            SELECT o.*, c.name as customer_name, c.phone as customer_phone, c.gender, s.name as shop_name, s.phone as shop_phone 
             FROM orders o
             JOIN customers c ON o.customer_id = c.id
             JOIN shops s ON o.shop_id = s.id
@@ -38,7 +38,11 @@ if (empty($tagId)) {
 // Decode measurements
 $measurements = [];
 if ($order && !empty($order['measurements_snapshot'])) {
+    require_once 'includes/CuttingFormulaEngine.php';
     $measurements = json_decode($order['measurements_snapshot'], true);
+    if ($order['status'] === 'cutting') {
+        $measurements = CuttingFormulaEngine::applyFormulas($order['gender'] ?? '', $measurements);
+    }
 }
 $upper = $measurements['upper'] ?? [];
 $lower = $measurements['lower'] ?? [];

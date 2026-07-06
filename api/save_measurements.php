@@ -72,7 +72,8 @@ try {
         "upper_chest" => floatval($upperInput['upper_chest'] ?? 0.0),
         "lower_chest" => floatval($upperInput['lower_chest'] ?? 0.0),
         "fitting" => floatval($upperInput['fitting'] ?? 0.0),
-        "chowk" => floatval($upperInput['chowk'] ?? 0.0)
+        "chowk" => floatval($upperInput['chowk'] ?? 0.0),
+        "sleeve_style" => htmlspecialchars($upperInput['sleeve_style'] ?? '')
     ];
 
     // Clean lower body inputs
@@ -82,7 +83,9 @@ try {
         "hips" => floatval($lowerInput['hips'] ?? 0.0),
         "rise" => floatval($lowerInput['rise'] ?? 0.0),
         "bottom_opening" => floatval($lowerInput['bottom_opening'] ?? 0.0),
-        "inseam" => floatval($lowerInput['inseam'] ?? 0.0)
+        "bottom_opening_type" => htmlspecialchars($lowerInput['bottom_opening_type'] ?? ''),
+        "inseam" => floatval($lowerInput['inseam'] ?? 0.0),
+        "length_type" => htmlspecialchars($lowerInput['length_type'] ?? '')
     ];
 
     $measurementNotes = trim($_POST['measurement_notes'] ?? '');

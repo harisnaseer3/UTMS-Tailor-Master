@@ -14,7 +14,7 @@ require_once __DIR__ . '/dictionary.php';
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#07050f">
     <!-- QR Code Generator Library via CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" integrity="sha512-pUh351Ky54+QFLs1d5Wn4V2TsaqB2A5F28T1euvdeZlhg19e34Vqecq63/S9v7477D/5xPmh28p9D28zUf51ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js" integrity="sha512-pUhApVQtLbnpLtJnGDuzD0So2xtmLJnJ7oBoMsBnZOkVkpqOfGLGPaBJGayD2zQe3lCgCibhJB14cj5wAxwVKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <!-- Tom Select (For Searchable Dropdowns) -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
@@ -45,10 +45,6 @@ require_once __DIR__ . '/dictionary.php';
                 
                 <?php if (in_array($_SESSION['role'], ['master', 'karigar'])): ?>
                     <!-- Dropdown or simple link to orders -->
-                <?php endif; ?>
-                
-                <?php if ($_SESSION['role'] === 'super_admin'): ?>
-                    <a href="register.php" class="btn-glass" style="border-color: var(--neon-orchid); color: var(--neon-orchid);">Register Shop</a>
                 <?php endif; ?>
                 
                 <span class="text-muted" style="font-size: 14px;">

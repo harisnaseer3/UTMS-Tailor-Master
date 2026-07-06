@@ -61,12 +61,23 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="number" step="0.1" name="upper[armhole]" id="<?php echo $idPrefix; ?>up_armhole" value="<?php echo floatval($upper['armhole'] ?? 0); ?>">
         </div>
-        <div class="measurement-input-wrapper">
+        <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>up_sleeve" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Sleeve (Baazu)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">بازو</span>
+                <span>Sleeve (Baazu) Length & Style</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">بازو کی لمبائی اور ڈیزائن</span>
             </label>
-            <input type="number" step="0.1" name="upper[sleeve]" id="<?php echo $idPrefix; ?>up_sleeve" value="<?php echo floatval($upper['sleeve'] ?? 0); ?>">
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <input type="number" step="0.1" name="upper[sleeve]" id="<?php echo $idPrefix; ?>up_sleeve" value="<?php echo floatval($upper['sleeve'] ?? 0); ?>" style="width: 45%;">
+                <select name="upper[sleeve_style]" id="<?php echo $idPrefix; ?>up_sleeve_style" class="form-control" style="width: 55%; padding: 2px; font-size: 13px; text-align: center; border:none; height:28px; margin: 0; background: rgba(0, 0, 0, 0.4); color: white;">
+                    <option value="" <?php echo (empty($upper['sleeve_style'])) ? 'selected' : ''; ?>>- Style / ڈیزائن -</option>
+                    <option value="Plain" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Plain') ? 'selected' : ''; ?>>Plain / سادہ</option>
+                    <option value="Cuff" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Cuff') ? 'selected' : ''; ?>>Cuff / کف</option>
+                    <option value="Button" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Button') ? 'selected' : ''; ?>>Button / بٹن</option>
+                    <option value="Flipper" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Flipper') ? 'selected' : ''; ?>>Flipper / فلپر</option>
+                    <option value="Leaf" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Leaf') ? 'selected' : ''; ?>>Leaf / لیف</option>
+                    <option value="Fitted" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Fitted') ? 'selected' : ''; ?>>Fitted / فٹنگ</option>
+                </select>
+            </div>
         </div>
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_neck" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
@@ -93,12 +104,21 @@ body.light-theme .measurement-input-wrapper label span:last-child {
     </h4>
     
     <div class="measurement-grid">
-        <div class="measurement-input-wrapper">
+        <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>lo_length" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Length (Lambai)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">لمبائی</span>
+                <span>Length & Type (Lambai)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">شلوار کی لمبائی اور قسم</span>
             </label>
-            <input type="number" step="0.1" name="lower[length]" id="<?php echo $idPrefix; ?>lo_length" value="<?php echo floatval($lower['length'] ?? 0); ?>">
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <input type="number" step="0.1" name="lower[length]" id="<?php echo $idPrefix; ?>lo_length" value="<?php echo floatval($lower['length'] ?? 0); ?>" style="width: 45%;">
+                <select name="lower[length_type]" id="<?php echo $idPrefix; ?>lo_length_type" class="form-control" style="width: 55%; padding: 2px; font-size: 13px; text-align: center; border:none; height:28px; margin: 0; background: rgba(0, 0, 0, 0.4); color: white;">
+                    <option value="" <?php echo (empty($lower['length_type'])) ? 'selected' : ''; ?>>- Type / قسم -</option>
+                    <option value="Plain Shalwar" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Plain Shalwar') ? 'selected' : ''; ?>>Plain Shalwar / سادہ شلوار</option>
+                    <option value="Trouser" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Trouser') ? 'selected' : ''; ?>>Trouser / ٹراؤزر</option>
+                    <option value="Capri" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Capri') ? 'selected' : ''; ?>>Capri / کیپری</option>
+                    <option value="Other" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Other') ? 'selected' : ''; ?>>Other / دوسرا</option>
+                </select>
+            </div>
         </div>
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>lo_waist" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
@@ -121,12 +141,20 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="number" step="0.1" name="lower[rise]" id="<?php echo $idPrefix; ?>lo_rise" value="<?php echo floatval($lower['rise'] ?? 0); ?>">
         </div>
-        <div class="measurement-input-wrapper">
+        <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>lo_bottom_opening" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Bottom (Paincha)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">پائنچہ</span>
+                <span>Bottom & Type (Paincha)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">پائنچہ کا سائز اور قسم</span>
             </label>
-            <input type="number" step="0.1" name="lower[bottom_opening]" id="<?php echo $idPrefix; ?>lo_bottom_opening" value="<?php echo floatval($lower['bottom_opening'] ?? 0); ?>">
+            <div style="display: flex; gap: 8px; justify-content: center;">
+                <input type="number" step="0.1" name="lower[bottom_opening]" id="<?php echo $idPrefix; ?>lo_bottom_opening" value="<?php echo floatval($lower['bottom_opening'] ?? 0); ?>" style="width: 45%;">
+                <select name="lower[bottom_opening_type]" id="<?php echo $idPrefix; ?>lo_bottom_opening_type" class="form-control" style="width: 55%; padding: 2px; font-size: 13px; text-align: center; border:none; height:28px; margin: 0; background: rgba(0, 0, 0, 0.4); color: white;">
+                    <option value="" <?php echo (empty($lower['bottom_opening_type'])) ? 'selected' : ''; ?>>- Type / قسم -</option>
+                    <option value="Cut Work" <?php echo (isset($lower['bottom_opening_type']) && $lower['bottom_opening_type'] === 'Cut Work') ? 'selected' : ''; ?>>Cut Work / کٹ ورک</option>
+                    <option value="Aged" <?php echo (isset($lower['bottom_opening_type']) && $lower['bottom_opening_type'] === 'Aged') ? 'selected' : ''; ?>>Aged / ایجڈ</option>
+                    <option value="Other" <?php echo (isset($lower['bottom_opening_type']) && $lower['bottom_opening_type'] === 'Other') ? 'selected' : ''; ?>>Other / دوسرا</option>
+                </select>
+            </div>
         </div>
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>lo_inseam" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">

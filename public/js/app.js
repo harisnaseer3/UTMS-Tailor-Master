@@ -53,6 +53,10 @@ function openVaultModal(customer) {
     document.getElementById('m_up_neck').value = upper.neck || 0;
     document.getElementById('m_up_hem_width').value = upper.hem_width || 0;
     document.getElementById('m_up_darts').value = upper.darts || 'No';
+    const sleeveStyleEl = document.getElementById('m_up_sleeve_style');
+    if (sleeveStyleEl) {
+        sleeveStyleEl.value = upper.sleeve_style || '';
+    }
     document.getElementById('m_up_cut').value = upper.cut || 'Straight';
     document.getElementById('m_up_flare').value = upper.flare || 0;
     document.getElementById('m_up_upper_chest').value = upper.upper_chest || 0;
@@ -68,10 +72,14 @@ function openVaultModal(customer) {
     
     // Populate lower body inputs
     document.getElementById('m_lo_length').value = lower.length || 0;
+    const mLoLengthTypeEl = document.getElementById('m_lo_length_type');
+    if (mLoLengthTypeEl) mLoLengthTypeEl.value = lower.length_type || '';
     document.getElementById('m_lo_waist').value = lower.waist || 0;
     document.getElementById('m_lo_hips').value = lower.hips || 0;
     document.getElementById('m_lo_rise').value = lower.rise || 0;
     document.getElementById('m_lo_bottom_opening').value = lower.bottom_opening || 0;
+    const mLoBottomOpeningTypeEl = document.getElementById('m_lo_bottom_opening_type');
+    if (mLoBottomOpeningTypeEl) mLoBottomOpeningTypeEl.value = lower.bottom_opening_type || '';
     document.getElementById('m_lo_inseam').value = lower.inseam || 0;
     
     // Toggle women's specific fields based on gender
@@ -388,16 +396,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('o_up_neck').value = upper.neck || 0;
                     document.getElementById('o_up_hem_width').value = upper.hem_width || 0;
                     document.getElementById('o_up_darts').value = upper.darts || 'No';
+                    const oSleeveStyleEl = document.getElementById('o_up_sleeve_style');
+                    if (oSleeveStyleEl) oSleeveStyleEl.value = upper.sleeve_style || '';
                     document.getElementById('o_up_cut').value = upper.cut || 'Straight';
                     document.getElementById('o_up_flare').value = upper.flare || 0;
                     document.getElementById('o_up_upper_chest').value = upper.upper_chest || 0;
                     document.getElementById('o_up_lower_chest').value = upper.lower_chest || 0;
                     
                     document.getElementById('o_lo_length').value = lower.length || 0;
+                    const oLoLengthTypeEl = document.getElementById('o_lo_length_type');
+                    if (oLoLengthTypeEl) oLoLengthTypeEl.value = lower.length_type || '';
                     document.getElementById('o_lo_waist').value = lower.waist || 0;
                     document.getElementById('o_lo_hips').value = lower.hips || 0;
                     document.getElementById('o_lo_rise').value = lower.rise || 0;
                     document.getElementById('o_lo_bottom_opening').value = lower.bottom_opening || 0;
+                    const oLoBottomOpeningTypeEl = document.getElementById('o_lo_bottom_opening_type');
+                    if (oLoBottomOpeningTypeEl) oLoBottomOpeningTypeEl.value = lower.bottom_opening_type || '';
                     document.getElementById('o_lo_inseam').value = lower.inseam || 0;
                     
                     const womensFields = document.getElementById('o_womens-specific-fields');

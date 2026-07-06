@@ -20,7 +20,7 @@ if (empty($tagId)) {
         // and extract the shop details. Then we can display it. If the user is logged in,
         // they can toggle status if they belong to that shop)
         $stmt = $pdo->prepare("
-            SELECT o.*, c.name as customer_name, c.phone as customer_phone, s.name as shop_name 
+            SELECT o.*, c.name as customer_name, c.phone as customer_phone, c.gender, s.name as shop_name 
             FROM orders o
             JOIN customers c ON o.customer_id = c.id
             JOIN shops s ON o.shop_id = s.id
@@ -102,43 +102,57 @@ require_once 'includes/header.php';
             <!-- Critical Sizing Measurements (Top 3) -->
             <div style="margin-bottom: 25px;">
                 <h4 style="color: var(--neon-orchid); font-size: 13px; text-transform: uppercase; border-bottom: 1px solid rgba(184, 41, 242, 0.15); padding-bottom: 5px; margin-bottom: 12px;">
-                    📏 Critical Measurements (Primary)
+                    📏 All Measurements
                 </h4>
                 
                 <?php 
+                    require_once 'includes/CuttingFormulaEngine.php';
                     $measurements = json_decode($order['measurements_snapshot'], true);
+                    if ($order['status'] === 'cutting') {
+                        $measurements = CuttingFormulaEngine::applyFormulas($order['gender'] ?? '', $measurements);
+                    }
                     $upper = $measurements['upper'] ?? [];
                     $lower = $measurements['lower'] ?? [];
                 ?>
                 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Upper Length</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['length'] ?? 0); ?>"</strong>
-                    </div>
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Shoulder</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['shoulder'] ?? 0); ?>"</strong>
-                    </div>
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Chest/Bust</span>
-                        <strong style="font-size: 18px; color: var(--neon-cyan); font-family: var(--font-english);"><?php echo intval($upper['chest'] ?? 0); ?>"</strong>
-                    </div>
-                </div>
+                    <?php 
+                    $fields = [
+                        ['label' => 'Up. Length', 'urdu' => 'لمبائی', 'val' => $upper['length'] ?? ''],
+                        ['label' => 'Shoulder', 'urdu' => 'تیرا', 'val' => $upper['shoulder'] ?? ''],
+                        ['label' => 'Chest', 'urdu' => 'چھاتی', 'val' => $upper['chest'] ?? ''],
+                        ['label' => 'Armhole', 'urdu' => 'مونڈھا', 'val' => $upper['armhole'] ?? ''],
+                        ['label' => 'Sleeve', 'urdu' => 'بازو', 'val' => $upper['sleeve'] ?? ''],
+                        ['label' => 'Neck', 'urdu' => 'گلا', 'val' => $upper['neck'] ?? ''],
+                        ['label' => 'Hem Width', 'urdu' => 'دامن', 'val' => $upper['hem_width'] ?? ''],
+                        ['label' => 'Darts', 'urdu' => 'ڈارٹس', 'val' => $upper['darts'] ?? '', 'is_string' => true],
+                        ['label' => 'Cut', 'urdu' => 'کٹائی', 'val' => $upper['cut'] ?? '', 'is_string' => true],
+                        ['label' => 'Flare', 'urdu' => 'گھیراؤ', 'val' => $upper['flare'] ?? ''],
+                        ['label' => 'Up. Chest', 'urdu' => 'اوپری چھاتی', 'val' => $upper['upper_chest'] ?? ''],
+                        ['label' => 'Low. Chest', 'urdu' => 'نچلی چھاتی', 'val' => $upper['lower_chest'] ?? ''],
+                        
+                        ['label' => 'Low. Length', 'urdu' => 'شلوار لمبائی', 'val' => $lower['length'] ?? ''],
+                        ['label' => 'Waist', 'urdu' => 'کمر', 'val' => $lower['waist'] ?? ''],
+                        ['label' => 'Hips', 'urdu' => 'ہپس', 'val' => $lower['hips'] ?? ''],
+                        ['label' => 'Rise', 'urdu' => 'آسن', 'val' => $lower['rise'] ?? ''],
+                        ['label' => 'Bottom', 'urdu' => 'پائنچہ', 'val' => $lower['bottom_opening'] ?? ''],
+                        ['label' => 'Inseam', 'urdu' => 'اندرونی لمبائی', 'val' => $lower['inseam'] ?? '']
+                    ];
 
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; margin-top: 12px;">
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Lower Length</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['length'] ?? 0); ?>"</strong>
-                    </div>
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Waist</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['waist'] ?? 0); ?>"</strong>
-                    </div>
-                    <div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">
-                        <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Bottom Opening</span>
-                        <strong style="font-size: 18px; color: var(--neon-orchid); font-family: var(--font-english);"><?php echo intval($lower['bottom_opening'] ?? 0); ?>"</strong>
-                    </div>
+                    foreach ($fields as $field) {
+                        $val = $field['val'];
+                        $isString = $field['is_string'] ?? false;
+                        
+                        if ((!$isString && floatval($val) > 0) || ($isString && !empty(trim($val)) && trim($val) !== 'No')) {
+                            $displayVal = htmlspecialchars($val) . ($isString ? '' : '"');
+                            echo '<div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">';
+                            echo '<span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 2px;">' . $field['label'] . '</span>';
+                            echo '<span style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px; font-family: var(--font-urdu);">' . $field['urdu'] . '</span>';
+                            echo '<strong style="font-size: 16px; color: var(--neon-cyan); font-family: var(--font-english);">' . $displayVal . '</strong>';
+                            echo '</div>';
+                        }
+                    }
+                    ?>
                 </div>
             </div>
 

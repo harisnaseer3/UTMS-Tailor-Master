@@ -625,7 +625,9 @@ select.form-control option {
     
     .nav-links {
         width: 100%;
-        justify-content: space-around;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
     }
 }
 
