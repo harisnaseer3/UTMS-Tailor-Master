@@ -242,6 +242,23 @@ a:hover {
     margin-bottom: 30px;
 }
 
+.responsive-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.responsive-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
 /* Stats Cards (Unique colors and icons) */
 .stat-card {
     display: flex;
@@ -627,7 +644,94 @@ select.form-control option {
         width: 100%;
         justify-content: center;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
+    }
+
+    .responsive-header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-action-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .header-action-buttons .btn-glass {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .responsive-grid-2col {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Optimize buttons for mobile */
+    .btn-glass {
+        padding: 6px 12px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    /* Adjust typography */
+    h1 { font-size: 24px !important; }
+    h2 { font-size: 20px !important; }
+    h3 { font-size: 18px !important; }
+    
+    /* Compact layout for cards */
+    .glass-card {
+        padding: 16px;
+    }
+    
+    /* Optimize app container spacing */
+    .app-container {
+        padding: 0 12px;
+    }
+    
+    /* Table adaptations */
+    table th, table td {
+        padding: 8px 6px !important;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    
+    /* Form controls & inputs */
+    .form-control {
+        padding: 10px;
+        font-size: 14px;
+    }
+    
+    .form-label {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    
+    .measurement-input-wrapper input {
+        font-size: 14px;
+        padding: 4px;
+    }
+    
+    /* Modal compactness */
+    .modal-content {
+        padding: 16px;
+    }
+    
+    /* Adjust specific icons and stats */
+    .stat-val {
+        font-size: 24px;
+    }
+    
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Fix header flex layout on dashboard */
+    .glass-card > div[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
     }
 }
 

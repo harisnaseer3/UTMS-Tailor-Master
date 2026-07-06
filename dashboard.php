@@ -377,12 +377,12 @@ require_once 'includes/header.php';
 
 <?php if ($role === 'master'): ?>
     <!-- ==================== TAILOR MASTER DASHBOARD ==================== -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div class="responsive-header-flex" style="margin-bottom: 30px;">
         <div>
             <h2 style="font-size: 28px; font-weight: 700;"><?php echo __('dashboard'); ?></h2>
             <p style="color: var(--text-secondary);"><?php echo __('tagline'); ?> &bull; Shop ID: <?php echo $shopId; ?></p>
         </div>
-        <div style="display: flex; gap: 12px;">
+        <div class="header-action-buttons">
             <button onclick="openModal('modal-staff')" class="btn-glass btn-neon-gold">+ Add Karigar / کاریگر</button>
             <button onclick="openModal('modal-customer')" class="btn-glass btn-neon-orchid">+ Add Customer / نیا گاہک</button>
             <button onclick="openModal('modal-order')" class="btn-glass btn-neon-cyan">+ Create New Order / نیا آرڈر</button>
@@ -475,7 +475,7 @@ require_once 'includes/header.php';
     </div>
 
     <!-- Customers & Sizing Vault Scopes -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px;">
+    <div class="responsive-grid-2col" style="margin-bottom: 30px;">
         <!-- Customers Directory -->
         <div class="glass-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
