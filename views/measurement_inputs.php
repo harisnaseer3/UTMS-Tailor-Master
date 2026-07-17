@@ -33,6 +33,7 @@ body.light-theme .measurement-input-wrapper label span:last-child {
     </h4>
     
     <div class="measurement-grid">
+        <!-- 1. Length (Lambai) -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_length" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Length (Lambai)</span>
@@ -40,27 +41,8 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="number" step="0.1" name="upper[length]" id="<?php echo $idPrefix; ?>up_length" value="<?php echo floatval($upper['length'] ?? 0); ?>">
         </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_shoulder" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Shoulder (Teera)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">تیرا</span>
-            </label>
-            <input type="number" step="0.1" name="upper[shoulder]" id="<?php echo $idPrefix; ?>up_shoulder" value="<?php echo floatval($upper['shoulder'] ?? 0); ?>">
-        </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_chest" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Chest/Bust (Cheeti)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چھاتی</span>
-            </label>
-            <input type="number" step="0.1" name="upper[chest]" id="<?php echo $idPrefix; ?>up_chest" value="<?php echo floatval($upper['chest'] ?? 0); ?>">
-        </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_armhole" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Armhole (Monda)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">مونڈھا</span>
-            </label>
-            <input type="number" step="0.1" name="upper[armhole]" id="<?php echo $idPrefix; ?>up_armhole" value="<?php echo floatval($upper['armhole'] ?? 0); ?>">
-        </div>
+        
+        <!-- 2. Sleeve (Baazu) Length & Style -->
         <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>up_sleeve" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Sleeve (Baazu) Length & Style</span>
@@ -79,16 +61,65 @@ body.light-theme .measurement-input-wrapper label span:last-child {
                 </select>
             </div>
         </div>
+
+        <!-- 3. Shoulder (Teera) -->
         <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_neck" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Neck F/B (Gala)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">اگلا/پچھلا گلا</span>
+            <label for="<?php echo $idPrefix; ?>up_shoulder" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Shoulder (Teera)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">تیرا</span>
             </label>
-            <input type="number" step="0.1" name="upper[neck]" id="<?php echo $idPrefix; ?>up_neck" value="<?php echo floatval($upper['neck'] ?? 0); ?>">
+            <input type="number" step="0.1" name="upper[shoulder]" id="<?php echo $idPrefix; ?>up_shoulder" value="<?php echo floatval($upper['shoulder'] ?? 0); ?>">
         </div>
+        
+        <!-- Armhole (Monda) -->
         <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_armhole" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Armhole (Monda)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">مونڈھا</span>
+            </label>
+            <input type="number" step="0.1" name="upper[armhole]" id="<?php echo $idPrefix; ?>up_armhole" value="<?php echo floatval($upper['armhole'] ?? 0); ?>">
+        </div>
+        
+        <!-- 4. Chest/Bust (Cheeti) -->
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_chest" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Chest/Bust (Cheeti)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چھاتی</span>
+            </label>
+            <input type="number" step="0.1" name="upper[chest]" id="<?php echo $idPrefix; ?>up_chest" value="<?php echo floatval($upper['chest'] ?? 0); ?>">
+        </div>
+
+        <!-- 5. Fitting/Waist (Kamar) -->
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_fitting" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Fitting/Waist (Kamar)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">فٹنگ/کمر</span>
+            </label>
+            <input type="number" step="0.1" name="upper[fitting]" id="<?php echo $idPrefix; ?>up_fitting" value="<?php echo floatval($upper['fitting'] ?? 0); ?>">
+        </div>
+
+        <!-- 6. Hips (Hips) -->
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>lo_hips" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Hips (Hips)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">ہپس</span>
+            </label>
+            <input type="number" step="0.1" name="lower[hips]" id="<?php echo $idPrefix; ?>lo_hips" value="<?php echo floatval($lower['hips'] ?? 0); ?>">
+        </div>
+
+        <!-- 7. Chowk / Chak -->
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_chowk" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Chowk / Chak</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چاک</span>
+            </label>
+            <input type="number" step="0.1" name="upper[chowk]" id="<?php echo $idPrefix; ?>up_chowk" value="<?php echo floatval($upper['chowk'] ?? 0); ?>">
+        </div>
+
+        <!-- 8. Flare / Ghera / Hem Width (Daman) -->
+        <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>up_hem_width" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Hem Width (Daman)</span>
+                <span>Flare / Ghera / Hem Width (Daman)</span>
                 <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">دامن/گھیرا</span>
             </label>
             <input type="number" step="0.1" name="upper[hem_width]" id="<?php echo $idPrefix; ?>up_hem_width" value="<?php echo floatval($upper['hem_width'] ?? 0); ?>">
@@ -104,6 +135,7 @@ body.light-theme .measurement-input-wrapper label span:last-child {
     </h4>
     
     <div class="measurement-grid">
+        <!-- 1. Length & Type (Lambai) -->
         <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>lo_length" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Length & Type (Lambai)</span>
@@ -114,33 +146,24 @@ body.light-theme .measurement-input-wrapper label span:last-child {
                 <select name="lower[length_type]" id="<?php echo $idPrefix; ?>lo_length_type" class="form-control" style="width: 55%; padding: 2px; font-size: 13px; text-align: center; border:none; height:28px; margin: 0; background: rgba(0, 0, 0, 0.4); color: white;">
                     <option value="" <?php echo (empty($lower['length_type'])) ? 'selected' : ''; ?>>- Type / قسم -</option>
                     <option value="Plain Shalwar" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Plain Shalwar') ? 'selected' : ''; ?>>Plain Shalwar / سادہ شلوار</option>
+                    <option value="Belt Shalwar" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Belt Shalwar') ? 'selected' : ''; ?>>Belt Shalwar / بیلٹ شلوار</option>
                     <option value="Trouser" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Trouser') ? 'selected' : ''; ?>>Trouser / ٹراؤزر</option>
                     <option value="Capri" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Capri') ? 'selected' : ''; ?>>Capri / کیپری</option>
                     <option value="Other" <?php echo (isset($lower['length_type']) && $lower['length_type'] === 'Other') ? 'selected' : ''; ?>>Other / دوسرا</option>
                 </select>
             </div>
         </div>
+
+        <!-- 2. Inseam -->
         <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>lo_waist" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Waist (Kamar)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">کمر</span>
+            <label for="<?php echo $idPrefix; ?>lo_inseam" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Inseam</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">اندرونی لمبائی</span>
             </label>
-            <input type="number" step="0.1" name="lower[waist]" id="<?php echo $idPrefix; ?>lo_waist" value="<?php echo floatval($lower['waist'] ?? 0); ?>">
+            <input type="number" step="0.1" name="lower[inseam]" id="<?php echo $idPrefix; ?>lo_inseam" value="<?php echo floatval($lower['inseam'] ?? 0); ?>">
         </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>lo_hips" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Hips (Hips)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">ہپس</span>
-            </label>
-            <input type="number" step="0.1" name="lower[hips]" id="<?php echo $idPrefix; ?>lo_hips" value="<?php echo floatval($lower['hips'] ?? 0); ?>">
-        </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>lo_rise" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Rise (Asan)</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">آسن</span>
-            </label>
-            <input type="number" step="0.1" name="lower[rise]" id="<?php echo $idPrefix; ?>lo_rise" value="<?php echo floatval($lower['rise'] ?? 0); ?>">
-        </div>
+
+        <!-- 3. Bottom & Type (Paincha) -->
         <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>lo_bottom_opening" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Bottom & Type (Paincha)</span>
@@ -156,12 +179,14 @@ body.light-theme .measurement-input-wrapper label span:last-child {
                 </select>
             </div>
         </div>
+
+        <!-- 4. Rise (Asan) -->
         <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>lo_inseam" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Inseam</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">اندرونی لمبائی</span>
+            <label for="<?php echo $idPrefix; ?>lo_rise" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Rise (Asan)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">آسن</span>
             </label>
-            <input type="number" step="0.1" name="lower[inseam]" id="<?php echo $idPrefix; ?>lo_inseam" value="<?php echo floatval($lower['inseam'] ?? 0); ?>">
+            <input type="number" step="0.1" name="lower[rise]" id="<?php echo $idPrefix; ?>lo_rise" value="<?php echo floatval($lower['rise'] ?? 0); ?>">
         </div>
     </div>
 </div>
@@ -174,6 +199,16 @@ body.light-theme .measurement-input-wrapper label span:last-child {
     </h4>
     
     <div class="measurement-grid">
+        <!-- Neck F/B (Gala) -->
+        <div class="measurement-input-wrapper">
+            <label for="<?php echo $idPrefix; ?>up_neck" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <span>Neck F/B (Gala)</span>
+                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">اگلا/پچھلا گلا</span>
+            </label>
+            <input type="number" step="0.1" name="upper[neck]" id="<?php echo $idPrefix; ?>up_neck" value="<?php echo floatval($upper['neck'] ?? 0); ?>">
+        </div>
+        
+        <!-- Darts -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_darts" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Darts</span>
@@ -184,6 +219,8 @@ body.light-theme .measurement-input-wrapper label span:last-child {
                 <option value="Yes" <?php echo (isset($upper['darts']) && $upper['darts'] === 'Yes') ? 'selected' : ''; ?>>Yes</option>
             </select>
         </div>
+        
+        <!-- Cut (A-Line/Frock) -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_cut" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Cut (A-Line/Frock)</span>
@@ -191,13 +228,8 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="text" name="upper[cut]" id="<?php echo $idPrefix; ?>up_cut" value="<?php echo htmlspecialchars($upper['cut'] ?? 'Straight'); ?>" style="font-size:13px;">
         </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_flare" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Flare / Ghera</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">گھیراؤ / فلیر</span>
-            </label>
-            <input type="number" step="0.1" name="upper[flare]" id="<?php echo $idPrefix; ?>up_flare" value="<?php echo floatval($upper['flare'] ?? 0); ?>">
-        </div>
+
+        <!-- Upper Chest -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_upper_chest" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Upper Chest</span>
@@ -205,26 +237,14 @@ body.light-theme .measurement-input-wrapper label span:last-child {
             </label>
             <input type="number" step="0.1" name="upper[upper_chest]" id="<?php echo $idPrefix; ?>up_upper_chest" value="<?php echo floatval($upper['upper_chest'] ?? 0); ?>">
         </div>
+
+        <!-- Lower Chest -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_lower_chest" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                 <span>Lower Chest</span>
                 <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">نچلی چھاتی</span>
             </label>
             <input type="number" step="0.1" name="upper[lower_chest]" id="<?php echo $idPrefix; ?>up_lower_chest" value="<?php echo floatval($upper['lower_chest'] ?? 0); ?>">
-        </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_fitting" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Fitting</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">فٹنگ</span>
-            </label>
-            <input type="number" step="0.1" name="upper[fitting]" id="<?php echo $idPrefix; ?>up_fitting" value="<?php echo floatval($upper['fitting'] ?? 0); ?>">
-        </div>
-        <div class="measurement-input-wrapper">
-            <label for="<?php echo $idPrefix; ?>up_chowk" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Chowk / Chak</span>
-                <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چاک</span>
-            </label>
-            <input type="number" step="0.1" name="upper[chowk]" id="<?php echo $idPrefix; ?>up_chowk" value="<?php echo floatval($upper['chowk'] ?? 0); ?>">
         </div>
     </div>
 </div>

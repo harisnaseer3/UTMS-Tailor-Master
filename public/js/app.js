@@ -58,7 +58,7 @@ function openVaultModal(customer) {
         sleeveStyleEl.value = upper.sleeve_style || '';
     }
     document.getElementById('m_up_cut').value = upper.cut || 'Straight';
-    document.getElementById('m_up_flare').value = upper.flare || 0;
+
     document.getElementById('m_up_upper_chest').value = upper.upper_chest || 0;
     document.getElementById('m_up_lower_chest').value = upper.lower_chest || 0;
     document.getElementById('m_up_fitting').value = upper.fitting || 0;
@@ -74,7 +74,7 @@ function openVaultModal(customer) {
     document.getElementById('m_lo_length').value = lower.length || 0;
     const mLoLengthTypeEl = document.getElementById('m_lo_length_type');
     if (mLoLengthTypeEl) mLoLengthTypeEl.value = lower.length_type || '';
-    document.getElementById('m_lo_waist').value = lower.waist || 0;
+
     document.getElementById('m_lo_hips').value = lower.hips || 0;
     document.getElementById('m_lo_rise').value = lower.rise || 0;
     document.getElementById('m_lo_bottom_opening').value = lower.bottom_opening || 0;
@@ -399,14 +399,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const oSleeveStyleEl = document.getElementById('o_up_sleeve_style');
                     if (oSleeveStyleEl) oSleeveStyleEl.value = upper.sleeve_style || '';
                     document.getElementById('o_up_cut').value = upper.cut || 'Straight';
-                    document.getElementById('o_up_flare').value = upper.flare || 0;
+
                     document.getElementById('o_up_upper_chest').value = upper.upper_chest || 0;
                     document.getElementById('o_up_lower_chest').value = upper.lower_chest || 0;
                     
                     document.getElementById('o_lo_length').value = lower.length || 0;
                     const oLoLengthTypeEl = document.getElementById('o_lo_length_type');
                     if (oLoLengthTypeEl) oLoLengthTypeEl.value = lower.length_type || '';
-                    document.getElementById('o_lo_waist').value = lower.waist || 0;
+
                     document.getElementById('o_lo_hips').value = lower.hips || 0;
                     document.getElementById('o_lo_rise').value = lower.rise || 0;
                     document.getElementById('o_lo_bottom_opening').value = lower.bottom_opening || 0;
@@ -460,5 +460,29 @@ function togglePasswordVisibility(id, btn) {
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
         `;
+    }
+}
+
+// ==================== BULK DELETE HELPERS ====================
+function toggleSelectAll(source, checkboxName) {
+    const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]`);
+    checkboxes.forEach(cb => {
+        cb.checked = source.checked;
+    });
+}
+
+function confirmBulkDelete(formId, message) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    // Check if any checkboxes are selected (exclude the select-all checkbox)
+    const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked:not(.select-all-cb)');
+    if (checkboxes.length === 0) {
+        showToast('⚠️ Please select at least one item to delete.');
+        return;
+    }
+    
+    if (confirm(message)) {
+        form.submit();
     }
 }
