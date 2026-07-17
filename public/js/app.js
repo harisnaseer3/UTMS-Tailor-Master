@@ -399,6 +399,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const oSleeveStyleEl = document.getElementById('o_up_sleeve_style');
                     if (oSleeveStyleEl) oSleeveStyleEl.value = upper.sleeve_style || '';
                     document.getElementById('o_up_cut').value = upper.cut || 'Straight';
+                    document.getElementById('o_up_fitting').value = upper.fitting || 0;
+                    document.getElementById('o_up_chowk').value = upper.chowk || 0;
 
                     document.getElementById('o_up_upper_chest').value = upper.upper_chest || 0;
                     document.getElementById('o_up_lower_chest').value = upper.lower_chest || 0;

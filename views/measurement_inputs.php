@@ -83,7 +83,7 @@ body.light-theme .measurement-input-wrapper label span:last-child {
         <!-- 4. Chest/Bust (Cheeti) -->
         <div class="measurement-input-wrapper">
             <label for="<?php echo $idPrefix; ?>up_chest" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Chest/Bust (Cheeti)</span>
+                <span>Chest/Bust (Chaati)</span>
                 <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">چھاتی</span>
             </label>
             <input type="number" step="0.1" name="upper[chest]" id="<?php echo $idPrefix; ?>up_chest" value="<?php echo floatval($upper['chest'] ?? 0); ?>">

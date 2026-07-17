@@ -1003,7 +1003,10 @@ require_once 'includes/header.php';
                 </div>
                 
                 <div class="form-group" style="margin-bottom: 5px;">
-                    <label class="form-label" for="cust_select">Select Customer / گاہک منتخب کریں *</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <label class="form-label" for="cust_select" style="margin-bottom: 0;">Select Customer / گاہک منتخب کریں *</label>
+                        <button type="button" class="btn-glass" onclick="closeModal('modal-order'); openModal('modal-customer');" style="padding: 2px 6px; font-size: 11px; color: var(--neon-cyan); border-color: var(--neon-cyan);" title="Add New Customer">➕ Add</button>
+                    </div>
                     <select name="customer_id" id="cust_select" class="form-control" required>
                         <option value="">Select Customer / گاہک منتخب کریں...</option>
                         <?php foreach ($customersList as $cust): ?>

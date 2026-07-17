@@ -212,24 +212,24 @@ $lower = $measurements['lower'] ?? [];
             <?php 
             $fields = [
                 ['label' => 'Up. Length', 'val' => $upper['length'] ?? ''],
+                ['label' => 'Sleeve', 'val' => $upper['sleeve'] ?? ''],
                 ['label' => 'Shoulder', 'val' => $upper['shoulder'] ?? ''],
                 ['label' => 'Chest', 'val' => $upper['chest'] ?? ''],
+                ['label' => 'Fitting/Waist', 'val' => $upper['fitting'] ?? ''],
+                ['label' => 'Hips', 'val' => $lower['hips'] ?? ''],
+                ['label' => 'Flare/Daman', 'val' => $upper['hem_width'] ?? ''],
+                ['label' => 'Chowk', 'val' => $upper['chowk'] ?? ''],
                 ['label' => 'Armhole', 'val' => $upper['armhole'] ?? ''],
-                ['label' => 'Sleeve', 'val' => $upper['sleeve'] ?? ''],
                 ['label' => 'Neck', 'val' => $upper['neck'] ?? ''],
-                ['label' => 'Hem Width', 'val' => $upper['hem_width'] ?? ''],
                 ['label' => 'Darts', 'val' => $upper['darts'] ?? '', 'is_string' => true],
                 ['label' => 'Cut', 'val' => $upper['cut'] ?? '', 'is_string' => true],
-                ['label' => 'Flare', 'val' => $upper['flare'] ?? ''],
                 ['label' => 'Upper Chest', 'val' => $upper['upper_chest'] ?? ''],
                 ['label' => 'Lower Chest', 'val' => $upper['lower_chest'] ?? ''],
                 
                 ['label' => 'Low. Length', 'val' => $lower['length'] ?? ''],
-                ['label' => 'Waist', 'val' => $lower['waist'] ?? ''],
-                ['label' => 'Hips', 'val' => $lower['hips'] ?? ''],
-                ['label' => 'Rise', 'val' => $lower['rise'] ?? ''],
+                ['label' => 'Inseam', 'val' => $lower['inseam'] ?? ''],
                 ['label' => 'Bottom', 'val' => $lower['bottom_opening'] ?? ''],
-                ['label' => 'Inseam', 'val' => $lower['inseam'] ?? '']
+                ['label' => 'Rise', 'val' => $lower['rise'] ?? '']
             ];
             
             foreach ($fields as $field) {

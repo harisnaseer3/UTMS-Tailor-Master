@@ -119,24 +119,24 @@ require_once 'includes/header.php';
                     <?php 
                     $fields = [
                         ['label' => 'Up. Length', 'urdu' => 'لمبائی', 'val' => $upper['length'] ?? ''],
+                        ['label' => 'Sleeve', 'urdu' => 'بازو', 'val' => $upper['sleeve'] ?? ''],
                         ['label' => 'Shoulder', 'urdu' => 'تیرا', 'val' => $upper['shoulder'] ?? ''],
                         ['label' => 'Chest', 'urdu' => 'چھاتی', 'val' => $upper['chest'] ?? ''],
+                        ['label' => 'Fitting/Waist', 'urdu' => 'فٹنگ/کمر', 'val' => $upper['fitting'] ?? ''],
+                        ['label' => 'Hips', 'urdu' => 'ہپس', 'val' => $lower['hips'] ?? ''],
+                        ['label' => 'Flare/Daman', 'urdu' => 'دامن/گھیرا', 'val' => $upper['hem_width'] ?? ''],
+                        ['label' => 'Chowk', 'urdu' => 'چاک', 'val' => $upper['chowk'] ?? ''],
                         ['label' => 'Armhole', 'urdu' => 'مونڈھا', 'val' => $upper['armhole'] ?? ''],
-                        ['label' => 'Sleeve', 'urdu' => 'بازو', 'val' => $upper['sleeve'] ?? ''],
                         ['label' => 'Neck', 'urdu' => 'گلا', 'val' => $upper['neck'] ?? ''],
-                        ['label' => 'Hem Width', 'urdu' => 'دامن', 'val' => $upper['hem_width'] ?? ''],
                         ['label' => 'Darts', 'urdu' => 'ڈارٹس', 'val' => $upper['darts'] ?? '', 'is_string' => true],
                         ['label' => 'Cut', 'urdu' => 'کٹائی', 'val' => $upper['cut'] ?? '', 'is_string' => true],
-                        ['label' => 'Flare', 'urdu' => 'گھیراؤ', 'val' => $upper['flare'] ?? ''],
                         ['label' => 'Up. Chest', 'urdu' => 'اوپری چھاتی', 'val' => $upper['upper_chest'] ?? ''],
                         ['label' => 'Low. Chest', 'urdu' => 'نچلی چھاتی', 'val' => $upper['lower_chest'] ?? ''],
                         
                         ['label' => 'Low. Length', 'urdu' => 'شلوار لمبائی', 'val' => $lower['length'] ?? ''],
-                        ['label' => 'Waist', 'urdu' => 'کمر', 'val' => $lower['waist'] ?? ''],
-                        ['label' => 'Hips', 'urdu' => 'ہپس', 'val' => $lower['hips'] ?? ''],
-                        ['label' => 'Rise', 'urdu' => 'آسن', 'val' => $lower['rise'] ?? ''],
+                        ['label' => 'Inseam', 'urdu' => 'اندرونی لمبائی', 'val' => $lower['inseam'] ?? ''],
                         ['label' => 'Bottom', 'urdu' => 'پائنچہ', 'val' => $lower['bottom_opening'] ?? ''],
-                        ['label' => 'Inseam', 'urdu' => 'اندرونی لمبائی', 'val' => $lower['inseam'] ?? '']
+                        ['label' => 'Rise', 'urdu' => 'آسن', 'val' => $lower['rise'] ?? '']
                     ];
 
                     foreach ($fields as $field) {
@@ -146,9 +146,9 @@ require_once 'includes/header.php';
                         if ((!$isString && floatval($val) > 0) || ($isString && !empty(trim($val)) && trim($val) !== 'No')) {
                             $displayVal = htmlspecialchars($val) . ($isString ? '' : '"');
                             echo '<div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">';
-                            echo '<span style="font-size: 11px; color: var(--text-secondary); display: block; margin-bottom: 2px;">' . $field['label'] . '</span>';
-                            echo '<span style="font-size: 10px; color: var(--text-muted); display: block; margin-bottom: 4px; font-family: var(--font-urdu);">' . $field['urdu'] . '</span>';
-                            echo '<strong style="font-size: 16px; color: var(--neon-cyan); font-family: var(--font-english);">' . $displayVal . '</strong>';
+                            echo '<span style="font-size: 12px; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 2px;">' . $field['label'] . '</span>';
+                            echo '<span style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; font-family: var(--font-urdu);">' . $field['urdu'] . '</span>';
+                            echo '<strong style="font-size: 18px; font-weight: 900; color: var(--neon-cyan); font-family: var(--font-english);">' . $displayVal . '</strong>';
                             echo '</div>';
                         }
                     }
