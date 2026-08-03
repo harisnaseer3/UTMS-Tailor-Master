@@ -40,7 +40,7 @@ if (empty($tagId)) {
 require_once 'includes/header.php';
 ?>
 
-<div style="max-width: 500px; margin: 20px auto;">
+<div style="max-width: 750px; margin: 20px auto;">
     <?php if (!empty($error)): ?>
         <div class="glass-card" style="text-align: center; padding: 30px;">
             <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgb(239, 68, 68); color: #fca5a5; padding: 15px; border-radius: 8px; font-size: 14px; margin-bottom: 20px;">
@@ -117,38 +117,104 @@ require_once 'includes/header.php';
                 
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
                     <?php 
+                    $isGentsCutting = ($order['status'] === 'cutting' && in_array(strtolower(trim($order['gender'] ?? '')), ['male', 'gents', 'man']));
+
+                    // Group paired measurement fields so length/size and style/type appear in one single card
                     $fields = [
-                        ['label' => 'Up. Length', 'urdu' => 'لمبائی', 'val' => $upper['length'] ?? ''],
-                        ['label' => 'Sleeve', 'urdu' => 'بازو', 'val' => $upper['sleeve'] ?? ''],
-                        ['label' => 'Shoulder', 'urdu' => 'تیرا', 'val' => $upper['shoulder'] ?? ''],
-                        ['label' => 'Chest', 'urdu' => 'چھاتی', 'val' => $upper['chest'] ?? ''],
+                        [
+                            'label' => 'Kameez Length', 
+                            'urdu' => 'قمیض لمبائی / دامن', 
+                            'val' => $upper['length'] ?? '', 
+                            'sub_val' => $upper['daman_style'] ?? ''
+                        ],
+                        [
+                            'label' => 'Kameez Width', 
+                            'urdu' => 'قمیض چوڑائی', 
+                            'val' => $upper['kameez_width'] ?? ''
+                        ],
+                        [
+                            'label' => 'Sleeve (Bazu)', 
+                            'urdu' => 'بازو / سٹائل', 
+                            'val' => $upper['sleeve'] ?? '',
+                            'sub_val' => $upper['sleeve_style'] ?? ''
+                        ],
+                        [
+                            'label' => 'Cuff Size', 
+                            'urdu' => 'کف سائز', 
+                            'val' => $upper['cuff_size'] ?? ''
+                        ],
+                        [
+                            'label' => 'Shoulder (Teera)', 
+                            'urdu' => 'تیرا', 
+                            'val' => $upper['shoulder'] ?? ''
+                        ],
+                    ];
+
+                    if ($isGentsCutting) {
+                        $fields[] = ['label' => 'Kameez Armhole', 'urdu' => 'قمیض مونڈھا', 'val' => $upper['kameez_armhole'] ?? ''];
+                        $fields[] = ['label' => 'Bazu Armhole', 'urdu' => 'بازو مونڈھا', 'val' => $upper['bazu_armhole'] ?? ''];
+                    } else {
+                        $fields[] = ['label' => 'Chest', 'urdu' => 'چھاتی', 'val' => $upper['chest'] ?? ''];
+                    }
+
+                    $fields = array_merge($fields, [
                         ['label' => 'Fitting/Waist', 'urdu' => 'فٹنگ/کمر', 'val' => $upper['fitting'] ?? ''],
                         ['label' => 'Hips', 'urdu' => 'ہپس', 'val' => $lower['hips'] ?? ''],
                         ['label' => 'Flare/Daman', 'urdu' => 'دامن/گھیرا', 'val' => $upper['hem_width'] ?? ''],
                         ['label' => 'Chowk', 'urdu' => 'چاک', 'val' => $upper['chowk'] ?? ''],
                         ['label' => 'Armhole', 'urdu' => 'مونڈھا', 'val' => $upper['armhole'] ?? ''],
-                        ['label' => 'Neck', 'urdu' => 'گلا', 'val' => $upper['neck'] ?? ''],
+                        [
+                            'label' => 'Neck (Gala)', 
+                            'urdu' => 'گلا سائز اور سٹائل', 
+                            'val' => $upper['neck'] ?? '',
+                            'sub_val' => $upper['gala_style'] ?? ''
+                        ],
+                        ['label' => 'Front Patti', 'urdu' => 'سامنے پٹی', 'val' => $upper['patti_length'] ?? ''],
+                        ['label' => 'Pockets', 'urdu' => 'جیبیں', 'val' => is_array($upper['pockets'] ?? null) ? implode(', ', $upper['pockets']) : ($upper['pockets'] ?? ''), 'is_string' => true],
                         ['label' => 'Darts', 'urdu' => 'ڈارٹس', 'val' => $upper['darts'] ?? '', 'is_string' => true],
                         ['label' => 'Cut', 'urdu' => 'کٹائی', 'val' => $upper['cut'] ?? '', 'is_string' => true],
                         ['label' => 'Up. Chest', 'urdu' => 'اوپری چھاتی', 'val' => $upper['upper_chest'] ?? ''],
                         ['label' => 'Low. Chest', 'urdu' => 'نچلی چھاتی', 'val' => $upper['lower_chest'] ?? ''],
                         
-                        ['label' => 'Low. Length', 'urdu' => 'شلوار لمبائی', 'val' => $lower['length'] ?? ''],
+                        [
+                            'label' => 'Shalwar / Lower', 
+                            'urdu' => 'شلوار لمبائی / قسم', 
+                            'val' => $lower['length'] ?? '',
+                            'sub_val' => $lower['length_type'] ?? ''
+                        ],
                         ['label' => 'Inseam', 'urdu' => 'اندرونی لمبائی', 'val' => $lower['inseam'] ?? ''],
-                        ['label' => 'Bottom', 'urdu' => 'پائنچہ', 'val' => $lower['bottom_opening'] ?? ''],
+                        [
+                            'label' => 'Bottom (Paincha)', 
+                            'urdu' => 'پائنچہ / قسم', 
+                            'val' => $lower['bottom_opening'] ?? '',
+                            'sub_val' => $lower['bottom_opening_type'] ?? ''
+                        ],
                         ['label' => 'Rise', 'urdu' => 'آسن', 'val' => $lower['rise'] ?? '']
-                    ];
+                    ]);
 
                     foreach ($fields as $field) {
                         $val = $field['val'];
+                        $subVal = trim((string)($field['sub_val'] ?? ''));
                         $isString = $field['is_string'] ?? false;
                         
-                        if ((!$isString && floatval($val) > 0) || ($isString && !empty(trim($val)) && trim($val) !== 'No')) {
-                            $displayVal = htmlspecialchars($val) . ($isString ? '' : '"');
-                            echo '<div class="glass-card" style="padding: 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05);">';
+                        $hasNum = floatval($val) > 0;
+                        $hasText = $isString && !empty(trim((string)$val)) && trim((string)$val) !== 'No';
+
+                        if ($hasNum || $hasText || !empty($subVal)) {
+                            echo '<div class="glass-card" style="padding: 12px 10px; background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: center;">';
                             echo '<span style="font-size: 12px; font-weight: bold; color: var(--text-secondary); display: block; margin-bottom: 2px;">' . $field['label'] . '</span>';
-                            echo '<span style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; font-family: var(--font-urdu);">' . $field['urdu'] . '</span>';
-                            echo '<strong style="font-size: 18px; font-weight: 900; color: var(--neon-cyan); font-family: var(--font-english);">' . $displayVal . '</strong>';
+                            echo '<span style="font-size: 11px; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 6px; font-family: var(--font-urdu);">' . $field['urdu'] . '</span>';
+                            
+                            if ($hasNum) {
+                                echo '<strong style="font-size: 20px; font-weight: 900; color: var(--neon-cyan); font-family: var(--font-english);">' . htmlspecialchars((string)$val) . '"</strong>';
+                            } else if ($hasText) {
+                                echo '<strong style="font-size: 15px; font-weight: 800; color: var(--neon-cyan); font-family: var(--font-english);">' . htmlspecialchars((string)$val) . '</strong>';
+                            }
+
+                            if (!empty($subVal)) {
+                                echo '<span style="display: inline-block; margin-top: 4px; font-size: 12px; font-weight: 700; color: var(--neon-pink); background: rgba(255, 0, 127, 0.1); padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(255, 0, 127, 0.2);">' . htmlspecialchars($subVal) . '</span>';
+                            }
+                            
                             echo '</div>';
                         }
                     }

@@ -44,50 +44,91 @@ function openVaultModal(customer) {
     const upper = measurements.upper || {};
     const lower = measurements.lower || {};
     
-    // Populate upper body inputs
-    document.getElementById('m_up_length').value = upper.length || 0;
-    document.getElementById('m_up_shoulder').value = upper.shoulder || 0;
-    document.getElementById('m_up_chest').value = upper.chest || 0;
-    document.getElementById('m_up_armhole').value = upper.armhole || 0;
-    document.getElementById('m_up_sleeve').value = upper.sleeve || 0;
-    document.getElementById('m_up_neck').value = upper.neck || 0;
-    document.getElementById('m_up_hem_width').value = upper.hem_width || 0;
-    document.getElementById('m_up_darts').value = upper.darts || 'No';
-    const sleeveStyleEl = document.getElementById('m_up_sleeve_style');
-    if (sleeveStyleEl) {
-        sleeveStyleEl.value = upper.sleeve_style || '';
-    }
-    document.getElementById('m_up_cut').value = upper.cut || 'Straight';
+    // Helper function to safely set value if element exists
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.type === 'checkbox') {
+                el.checked = !!val;
+            } else {
+                el.value = (val !== undefined && val !== null) ? val : '';
+            }
+        }
+    };
+    
+    // Populate Gents Upper & Lower body inputs safely (g_ prefix)
+    setVal('m_g_up_length', upper.length || 0);
+    setVal('m_g_up_daman_style', upper.daman_style || '');
+    setVal('m_g_up_kameez_width', upper.kameez_width || 0);
+    setVal('m_g_up_hem_width', upper.hem_width || 0);
+    setVal('m_g_up_neck', upper.neck || 0);
+    setVal('m_g_up_gala_style', upper.gala_style || '');
+    setVal('m_g_up_shoulder', upper.shoulder || 0);
+    setVal('m_g_up_sleeve', upper.sleeve || 0);
+    setVal('m_g_up_chest', upper.chest || 0);
+    setVal('m_g_up_fitting', upper.fitting || 0);
+    setVal('m_g_up_cuff_size', upper.cuff_size || 0);
+    setVal('m_g_up_sleeve_style', upper.sleeve_style || '');
+    setVal('m_g_up_patti_length', upper.patti_length || 0);
+    
+    setVal('m_g_lo_length', lower.length || 0);
+    setVal('m_g_lo_length_type', lower.length_type || '');
+    setVal('m_g_lo_inseam', lower.inseam || 0);
+    setVal('m_g_lo_bottom_opening', lower.bottom_opening || 0);
+    setVal('m_g_lo_rise', lower.rise || 0);
+    setVal('m_g_measurement_notes', measurements.notes || '');
 
-    document.getElementById('m_up_upper_chest').value = upper.upper_chest || 0;
-    document.getElementById('m_up_lower_chest').value = upper.lower_chest || 0;
-    document.getElementById('m_up_fitting').value = upper.fitting || 0;
-    document.getElementById('m_up_chowk').value = upper.chowk || 0;
+    // Populate Ladies Upper & Lower body inputs safely (l_ prefix)
+    setVal('m_l_up_length', upper.length || 0);
+    setVal('m_l_up_shoulder', upper.shoulder || 0);
+    setVal('m_l_up_chest', upper.chest || 0);
+    setVal('m_l_up_upper_chest', upper.upper_chest || 0);
+    setVal('m_l_up_lower_chest', upper.lower_chest || 0);
+    setVal('m_l_up_fitting', upper.fitting || 0);
+    setVal('m_l_up_chowk', upper.chowk || 0);
+    setVal('m_l_up_armhole', upper.armhole || 0);
+    setVal('m_l_up_sleeve', upper.sleeve || 0);
+    setVal('m_l_up_sleeve_style', upper.sleeve_style || '');
+    setVal('m_l_up_neck', upper.neck || 0);
+    setVal('m_l_up_hem_width', upper.hem_width || 0);
+    setVal('m_l_up_darts', upper.darts || 'No');
+    setVal('m_l_up_cut', upper.cut || 'Straight');
     
-    // Populate notes
-    const notesEl = document.getElementById('m_measurement_notes');
-    if (notesEl) {
-        notesEl.value = measurements.notes || '';
-    }
-    
-    // Populate lower body inputs
-    document.getElementById('m_lo_length').value = lower.length || 0;
-    const mLoLengthTypeEl = document.getElementById('m_lo_length_type');
-    if (mLoLengthTypeEl) mLoLengthTypeEl.value = lower.length_type || '';
+    setVal('m_l_lo_length', lower.length || 0);
+    setVal('m_l_lo_length_type', lower.length_type || '');
+    setVal('m_l_lo_hips', lower.hips || 0);
+    setVal('m_l_lo_rise', lower.rise || 0);
+    setVal('m_l_lo_bottom_opening', lower.bottom_opening || 0);
+    setVal('m_l_lo_bottom_opening_type', lower.bottom_opening_type || '');
+    setVal('m_l_lo_inseam', lower.inseam || 0);
+    setVal('m_l_measurement_notes', measurements.notes || '');
 
-    document.getElementById('m_lo_hips').value = lower.hips || 0;
-    document.getElementById('m_lo_rise').value = lower.rise || 0;
-    document.getElementById('m_lo_bottom_opening').value = lower.bottom_opening || 0;
-    const mLoBottomOpeningTypeEl = document.getElementById('m_lo_bottom_opening_type');
-    if (mLoBottomOpeningTypeEl) mLoBottomOpeningTypeEl.value = lower.bottom_opening_type || '';
-    document.getElementById('m_lo_inseam').value = lower.inseam || 0;
+    // Populate Pockets checkboxes
+    const selectedPockets = upper.pockets ? (Array.isArray(upper.pockets) ? upper.pockets : String(upper.pockets).split(',')) : [];
+    document.querySelectorAll('input[name="gents_upper[pockets][]"]').forEach(chk => {
+        chk.checked = selectedPockets.includes(chk.value);
+    });
     
-    // Toggle women's specific fields based on gender
-    const womensFields = document.getElementById('m_womens-specific-fields');
-    if (womensFields) {
-        womensFields.style.display = (customer.gender === 'female') ? '' : 'none';
+    // Toggle Gents vs Ladies measurement forms based on gender
+    const isFemale = (customer.gender === 'female' || customer.gender === 'ladies' || customer.gender === 'woman');
+    
+    const gentsWrapper = document.getElementById('m_gents_form_wrapper');
+    const ladiesWrapper = document.getElementById('m_ladies_form_wrapper');
+    
+    if (gentsWrapper && ladiesWrapper) {
+        if (isFemale) {
+            gentsWrapper.style.display = 'none';
+            ladiesWrapper.style.display = 'block';
+            gentsWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+            ladiesWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        } else {
+            gentsWrapper.style.display = 'block';
+            ladiesWrapper.style.display = 'none';
+            gentsWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+            ladiesWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        }
     }
-    
+
     openModal('modal-vault');
 }
 
@@ -387,38 +428,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     const upper = data.measurements.upper || {};
                     const lower = data.measurements.lower || {};
+                    const notes = data.measurements.notes || '';
                     
-                    document.getElementById('o_up_length').value = upper.length || 0;
-                    document.getElementById('o_up_shoulder').value = upper.shoulder || 0;
-                    document.getElementById('o_up_chest').value = upper.chest || 0;
-                    document.getElementById('o_up_armhole').value = upper.armhole || 0;
-                    document.getElementById('o_up_sleeve').value = upper.sleeve || 0;
-                    document.getElementById('o_up_neck').value = upper.neck || 0;
-                    document.getElementById('o_up_hem_width').value = upper.hem_width || 0;
-                    document.getElementById('o_up_darts').value = upper.darts || 'No';
-                    const oSleeveStyleEl = document.getElementById('o_up_sleeve_style');
-                    if (oSleeveStyleEl) oSleeveStyleEl.value = upper.sleeve_style || '';
-                    document.getElementById('o_up_cut').value = upper.cut || 'Straight';
-                    document.getElementById('o_up_fitting').value = upper.fitting || 0;
-                    document.getElementById('o_up_chowk').value = upper.chowk || 0;
+                    // Gents fields (o_g_)
+                    setVal('o_g_up_length', upper.length || 0);
+                    setVal('o_g_up_daman_style', upper.daman_style || '');
+                    setVal('o_g_up_kameez_width', upper.kameez_width || 0);
+                    setVal('o_g_up_hem_width', upper.hem_width || 0);
+                    setVal('o_g_up_neck', upper.neck || 0);
+                    setVal('o_g_up_gala_style', upper.gala_style || '');
+                    setVal('o_g_up_shoulder', upper.shoulder || 0);
+                    setVal('o_g_up_sleeve', upper.sleeve || 0);
+                    setVal('o_g_up_chest', upper.chest || 0);
+                    setVal('o_g_up_fitting', upper.fitting || 0);
+                    setVal('o_g_up_cuff_size', upper.cuff_size || 0);
+                    setVal('o_g_up_sleeve_style', upper.sleeve_style || '');
+                    setVal('o_g_up_patti_length', upper.patti_length || 0);
+                    
+                    setVal('o_g_lo_length', lower.length || 0);
+                    setVal('o_g_lo_length_type', lower.length_type || '');
+                    setVal('o_g_lo_inseam', lower.inseam || 0);
+                    setVal('o_g_lo_bottom_opening', lower.bottom_opening || 0);
+                    setVal('o_g_lo_rise', lower.rise || 0);
+                    setVal('o_g_measurement_notes', notes);
 
-                    document.getElementById('o_up_upper_chest').value = upper.upper_chest || 0;
-                    document.getElementById('o_up_lower_chest').value = upper.lower_chest || 0;
+                    // Ladies fields (o_l_)
+                    setVal('o_l_up_length', upper.length || 0);
+                    setVal('o_l_up_shoulder', upper.shoulder || 0);
+                    setVal('o_l_up_chest', upper.chest || 0);
+                    setVal('o_l_up_upper_chest', upper.upper_chest || 0);
+                    setVal('o_l_up_lower_chest', upper.lower_chest || 0);
+                    setVal('o_l_up_fitting', upper.fitting || 0);
+                    setVal('o_l_up_chowk', upper.chowk || 0);
+                    setVal('o_l_up_armhole', upper.armhole || 0);
+                    setVal('o_l_up_sleeve', upper.sleeve || 0);
+                    setVal('o_l_up_sleeve_style', upper.sleeve_style || '');
+                    setVal('o_l_up_neck', upper.neck || 0);
+                    setVal('o_l_up_hem_width', upper.hem_width || 0);
+                    setVal('o_l_up_darts', upper.darts || 'No');
+                    setVal('o_l_up_cut', upper.cut || 'Straight');
                     
-                    document.getElementById('o_lo_length').value = lower.length || 0;
-                    const oLoLengthTypeEl = document.getElementById('o_lo_length_type');
-                    if (oLoLengthTypeEl) oLoLengthTypeEl.value = lower.length_type || '';
+                    setVal('o_l_lo_length', lower.length || 0);
+                    setVal('o_l_lo_length_type', lower.length_type || '');
+                    setVal('o_l_lo_hips', lower.hips || 0);
+                    setVal('o_l_lo_rise', lower.rise || 0);
+                    setVal('o_l_lo_bottom_opening', lower.bottom_opening || 0);
+                    setVal('o_l_lo_bottom_opening_type', lower.bottom_opening_type || '');
+                    setVal('o_l_lo_inseam', lower.inseam || 0);
+                    setVal('o_l_measurement_notes', notes);
 
-                    document.getElementById('o_lo_hips').value = lower.hips || 0;
-                    document.getElementById('o_lo_rise').value = lower.rise || 0;
-                    document.getElementById('o_lo_bottom_opening').value = lower.bottom_opening || 0;
-                    const oLoBottomOpeningTypeEl = document.getElementById('o_lo_bottom_opening_type');
-                    if (oLoBottomOpeningTypeEl) oLoBottomOpeningTypeEl.value = lower.bottom_opening_type || '';
-                    document.getElementById('o_lo_inseam').value = lower.inseam || 0;
+                    // Toggle Gents vs Ladies wrapper in order modal
+                    const isFemale = (data.gender === 'female' || data.gender === 'ladies' || data.gender === 'woman');
+                    const oGentsWrapper = document.getElementById('o_gents_form_wrapper');
+                    const oLadiesWrapper = document.getElementById('o_ladies_form_wrapper');
                     
-                    const womensFields = document.getElementById('o_womens-specific-fields');
-                    if (womensFields) {
-                        womensFields.style.display = (data.gender === 'female') ? '' : 'none';
+                    if (oGentsWrapper && oLadiesWrapper) {
+                        if (isFemale) {
+                            oGentsWrapper.style.display = 'none';
+                            oLadiesWrapper.style.display = 'block';
+                            
+                            // Disable Gents inputs so they don't submit, enable Ladies inputs
+                            oGentsWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+                            oLadiesWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                        } else {
+                            oGentsWrapper.style.display = 'block';
+                            oLadiesWrapper.style.display = 'none';
+                            
+                            // Enable Gents inputs, disable Ladies inputs so they don't submit
+                            oGentsWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+                            oLadiesWrapper.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+                        }
                     }
                 } else {
                     showToast('⚠️ Could not load customer measurements.');

@@ -75,10 +75,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array($role, ['master'])) {
                 $_SESSION['error_msg'] = 'This Tag ID is already assigned to another order.';
             } else {
                 try {
-                    // Update customer's measurements based on submitted form
-                    $upper = isset($_POST['upper']) && is_array($_POST['upper']) ? $_POST['upper'] : [];
-                    $lower = isset($_POST['lower']) && is_array($_POST['lower']) ? $_POST['lower'] : [];
-                    $measurementNotes = trim($_POST['measurement_notes'] ?? '');
+                    // Update customer's measurements based on submitted form (support gender-prefixed form inputs)
+                    $upperRaw = [];
+                    if (isset($_POST['gents_upper']) && is_array($_POST['gents_upper']) && !empty($_POST['gents_upper'])) {
+                        $upperRaw = $_POST['gents_upper'];
+                    } else if (isset($_POST['ladies_upper']) && is_array($_POST['ladies_upper']) && !empty($_POST['ladies_upper'])) {
+                        $upperRaw = $_POST['ladies_upper'];
+                    } else if (isset($_POST['upper']) && is_array($_POST['upper'])) {
+                        $upperRaw = $_POST['upper'];
+                    }
+
+                    $lowerRaw = [];
+                    if (isset($_POST['gents_lower']) && is_array($_POST['gents_lower']) && !empty($_POST['gents_lower'])) {
+                        $lowerRaw = $_POST['gents_lower'];
+                    } else if (isset($_POST['ladies_lower']) && is_array($_POST['ladies_lower']) && !empty($_POST['ladies_lower'])) {
+                        $lowerRaw = $_POST['ladies_lower'];
+                    } else if (isset($_POST['lower']) && is_array($_POST['lower'])) {
+                        $lowerRaw = $_POST['lower'];
+                    }
+
+                    $measurementNotes = trim($_POST['gents_measurement_notes'] ?? $_POST['ladies_measurement_notes'] ?? $_POST['measurement_notes'] ?? '');
+
+                    $upper = [];
+                    foreach ($upperRaw as $k => $v) {
+                        if (is_array($v)) {
+                            $upper[$k] = array_map('htmlspecialchars', $v);
+                        } else if (is_numeric($v)) {
+                            $upper[$k] = floatval($v);
+                        } else {
+                            $upper[$k] = htmlspecialchars($v);
+                        }
+                    }
+
+                    $lower = [];
+                    foreach ($lowerRaw as $k => $v) {
+                        if (is_array($v)) {
+                            $lower[$k] = array_map('htmlspecialchars', $v);
+                        } else if (is_numeric($v)) {
+                            $lower[$k] = floatval($v);
+                        } else {
+                            $lower[$k] = htmlspecialchars($v);
+                        }
+                    }
                     
                     $newMeasurements = [
                         'upper' => $upper,
@@ -566,10 +604,13 @@ require_once 'includes/header.php';
                             <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 1, 'text', this)">
                                 <?php echo __('customer_name'); ?> <span class="sort-arrow">⇅</span>
                             </th>
-                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 1, 'text', this)">
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 2, 'text', this)">
+                                Gender / صنف <span class="sort-arrow">⇅</span>
+                            </th>
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 3, 'text', this)">
                                 <?php echo __('phone'); ?> <span class="sort-arrow">⇅</span>
                             </th>
-                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 2, 'date', this)">
+                            <th style="padding: 10px 5px; cursor: pointer; user-select: none;" onclick="sortTable('customers-table', 4, 'date', this)">
                                 <?php echo __('date'); ?> <span class="sort-arrow">⇅</span>
                             </th>
                             <th style="padding: 10px 5px; text-align: right;"><?php echo __('actions'); ?></th>
@@ -577,12 +618,21 @@ require_once 'includes/header.php';
                     </thead>
                     <tbody>
                         <?php if (empty($customersList)): ?>
-                            <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-muted);">No customers registered yet.</td></tr>
+                            <tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-muted);">No customers registered yet.</td></tr>
                         <?php else: ?>
                             <?php foreach ($customersList as $cust): ?>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px;">
                                     <td style="padding: 12px 5px;"><input type="checkbox" name="customer_ids[]" value="<?php echo $cust['id']; ?>"></td>
                                     <td style="padding: 12px 5px; font-weight: 500;"><?php echo htmlspecialchars($cust['name']); ?></td>
+                                    <td style="padding: 12px 5px;">
+                                        <?php 
+                                            $g = strtolower($cust['gender'] ?? 'male');
+                                            $isFem = in_array($g, ['female', 'ladies', 'woman']);
+                                        ?>
+                                        <span class="badge" style="background: <?php echo $isFem ? 'rgba(255, 0, 127, 0.15)' : 'rgba(0, 240, 255, 0.15)'; ?>; color: <?php echo $isFem ? 'var(--neon-pink)' : 'var(--neon-cyan)'; ?>; border: 1px solid <?php echo $isFem ? 'rgba(255, 0, 127, 0.3)' : 'rgba(0, 240, 255, 0.3)'; ?>; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600;">
+                                            <?php echo $isFem ? '👩 Ladies' : '👨 Gents'; ?>
+                                        </span>
+                                    </td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo htmlspecialchars($cust['phone']); ?></td>
                                     <td style="padding: 12px 5px; color: var(--text-secondary);"><?php echo date('Y-m-d', strtotime($cust['created_at'])); ?></td>
                                     <td style="padding: 12px 5px; text-align: right;">
@@ -1037,31 +1087,7 @@ require_once 'includes/header.php';
             </div>
             
             
-            <!-- ZERO-COST FABRIC IMAGE UPLOAD BRIDGE -->
-            <div class="glass-card" style="background: rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.05); padding: 15px; margin-bottom: 20px;">
-                <h4 style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">📷 Fabric Image Upload Bridge / کپڑے کی تصویر کا لنک</h4>
-                <div style="display: flex; gap: 15px; align-items: center;">
-                    <button type="button" onclick="startUploadBridgeSession()" id="btn-init-bridge" class="btn-glass" style="font-size: 13px; border-color: var(--neon-cyan); color: var(--neon-cyan);">
-                        Generate Upload QR Link / کیو آر کوڈ بنائیں
-                    </button>
-                    <div id="bridge-status-text" style="font-size: 12px; color: var(--text-muted);">No upload bridge session active.</div>
-                </div>
-                
-                <!-- Expanded QR container hidden initially -->
-                <div id="bridge-qr-container" style="display: none; margin-top: 15px; text-align: center;">
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">
-                        Scan from mobile to take a photo & compress (< 200KB):
-                    </p>
-                    <div style="background: white; padding: 8px; border-radius: 8px; display: inline-block;">
-                        <canvas id="bridge-qr-canvas"></canvas>
-                    </div>
-                    <div id="uploaded-fabric-preview-box" style="display: none; margin-top: 15px;">
-                        <span style="font-size: 12px; color: var(--neon-emerald); display: block; margin-bottom: 5px;">✓ Fabric Image Synced!</span>
-                        <img id="uploaded-fabric-preview-img" src="" class="fabric-preview-large">
-                    </div>
-                </div>
-            </div>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
                     <label class="form-label" for="order_price">Price (Rs) / کل رقم</label>

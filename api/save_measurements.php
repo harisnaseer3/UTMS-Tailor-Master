@@ -54,38 +54,45 @@ try {
     }
 
     // 2. Parse and Validate Measurements
-    $upperInput = $_POST['upper'] ?? [];
-    $lowerInput = $_POST['lower'] ?? [];
+    $upperInput = $_POST['gents_upper'] ?? $_POST['ladies_upper'] ?? $_POST['upper'] ?? [];
+    $lowerInput = $_POST['gents_lower'] ?? $_POST['ladies_lower'] ?? $_POST['lower'] ?? [];
+    $notesInput = $_POST['gents_measurement_notes'] ?? $_POST['ladies_measurement_notes'] ?? $_POST['measurement_notes'] ?? '';
     
-    // Clean upper body inputs (cast numbers to float)
+    // Clean upper body inputs
     $upper = [
         "length" => floatval($upperInput['length'] ?? 0.0),
-        "shoulder" => floatval($upperInput['shoulder'] ?? 0.0),
-        "chest" => floatval($upperInput['chest'] ?? 0.0),
-        "armhole" => floatval($upperInput['armhole'] ?? 0.0),
-        "sleeve" => floatval($upperInput['sleeve'] ?? 0.0),
-        "neck" => floatval($upperInput['neck'] ?? 0.0),
+        "daman_style" => htmlspecialchars($upperInput['daman_style'] ?? ''),
+        "kameez_width" => floatval($upperInput['kameez_width'] ?? 0.0),
         "hem_width" => floatval($upperInput['hem_width'] ?? 0.0),
+        "neck" => floatval($upperInput['neck'] ?? 0.0),
+        "gala_style" => htmlspecialchars($upperInput['gala_style'] ?? ''),
+        "shoulder" => floatval($upperInput['shoulder'] ?? 0.0),
+        "sleeve" => floatval($upperInput['sleeve'] ?? 0.0),
+        "chest" => floatval($upperInput['chest'] ?? 0.0),
+        "fitting" => floatval($upperInput['fitting'] ?? 0.0),
+        "cuff_size" => floatval($upperInput['cuff_size'] ?? 0.0),
+        "sleeve_style" => htmlspecialchars($upperInput['sleeve_style'] ?? ''),
+        "patti_length" => floatval($upperInput['patti_length'] ?? 0.0),
+        "pockets" => isset($upperInput['pockets']) ? (is_array($upperInput['pockets']) ? array_map('htmlspecialchars', $upperInput['pockets']) : htmlspecialchars($upperInput['pockets'])) : [],
+        "armhole" => floatval($upperInput['armhole'] ?? 0.0),
         "darts" => htmlspecialchars($upperInput['darts'] ?? 'No'),
         "cut" => htmlspecialchars($upperInput['cut'] ?? 'Straight'),
         "flare" => floatval($upperInput['flare'] ?? 0.0),
         "upper_chest" => floatval($upperInput['upper_chest'] ?? 0.0),
         "lower_chest" => floatval($upperInput['lower_chest'] ?? 0.0),
-        "fitting" => floatval($upperInput['fitting'] ?? 0.0),
-        "chowk" => floatval($upperInput['chowk'] ?? 0.0),
-        "sleeve_style" => htmlspecialchars($upperInput['sleeve_style'] ?? '')
+        "chowk" => floatval($upperInput['chowk'] ?? 0.0)
     ];
 
     // Clean lower body inputs
     $lower = [
         "length" => floatval($lowerInput['length'] ?? 0.0),
+        "length_type" => htmlspecialchars($lowerInput['length_type'] ?? ''),
         "waist" => floatval($lowerInput['waist'] ?? 0.0),
         "hips" => floatval($lowerInput['hips'] ?? 0.0),
         "rise" => floatval($lowerInput['rise'] ?? 0.0),
         "bottom_opening" => floatval($lowerInput['bottom_opening'] ?? 0.0),
         "bottom_opening_type" => htmlspecialchars($lowerInput['bottom_opening_type'] ?? ''),
-        "inseam" => floatval($lowerInput['inseam'] ?? 0.0),
-        "length_type" => htmlspecialchars($lowerInput['length_type'] ?? '')
+        "inseam" => floatval($lowerInput['inseam'] ?? 0.0)
     ];
 
     $measurementNotes = trim($_POST['measurement_notes'] ?? '');
