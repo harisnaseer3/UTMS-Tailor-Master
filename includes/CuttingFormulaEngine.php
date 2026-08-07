@@ -121,9 +121,14 @@ class CuttingFormulaEngine {
             }
         }
 
-        // 2. Teera Formula: Teera / 2
+        // 2. Gala (Neck / Collar) Formula: ((Gala + 1.25) / 3.14) / 2
+        if (isset($upper['neck']) && floatval($upper['neck']) > 0) {
+            $upper['neck'] = ((floatval($upper['neck']) + 1.25) / 3.14) / 2;
+        }
+
+        // 3. Teera Formula: (Teera / 2) + 0.5
         if (isset($upper['shoulder']) && floatval($upper['shoulder']) > 0) {
-            $upper['shoulder'] = floatval($upper['shoulder']) / 2;
+            $upper['shoulder'] = (floatval($upper['shoulder']) / 2) + 0.5;
         }
 
         // 3. Chest (Chaati) Formula: Chest / 4
@@ -151,26 +156,49 @@ class CuttingFormulaEngine {
             $lower['bottom_opening'] = floatval($lower['bottom_opening']) + 0.5;
         }
 
-        // 8. Sleeve (Bazu) Formula: Bazu - 1.25
+        // 8. Sleeve (Bazu) Formula:
+        // - When Khula Bazu selected: Sleeve + 1.5
+        // - Otherwise (all cuff types except Khula Bazu):
+        //     - If cuff size is less than 8 (minimum of 8 condition): Sleeve - 1
+        //     - If cuff size is 8 or more (8 or more condition): Sleeve - 1.25
         if (isset($upper['sleeve']) && floatval($upper['sleeve']) > 0) {
-            $upper['sleeve'] = floatval($upper['sleeve']) - 1.25;
+            $sleeveVal = floatval($upper['sleeve']);
+            $sleeveStyle = trim($upper['sleeve_style'] ?? '');
+            $cuffSize = floatval($upper['cuff_size'] ?? 0);
+
+            if (strcasecmp($sleeveStyle, 'Khula Bazu') === 0) {
+                $upper['sleeve'] = $sleeveVal + 1.5;
+            } else {
+                if ($cuffSize >= 8) {
+                    $upper['sleeve'] = $sleeveVal - 1.25;
+                } else {
+                    $upper['sleeve'] = $sleeveVal - 1;
+                }
+            }
         }
 
         // 9. Armhole Formulas for Gents:
-        // Kameez Armhole = (Chest Formula Ans) - ((Kameez Width Formula Ans) - (Teera Formula Ans))
-        // Bazu Armhole = (Chest Formula Ans)
-        $chatiAns = $upper['chest'] ?? 0;
-        $teeraAns = $upper['shoulder'] ?? 0;
-        $kameezWidthAns = $upper['kameez_width'] ?? 0;
+        // Bazu Armhole = Chest (Chaati) / 4
+        // Kameez Armhole:
+        // - Part 1: (Kameez Width / 2) + 0.5   (which is Kameez Width Formula Ans)
+        // - Part 2: Teera initial value / 2
+        // - Part 3: Part 1 - Part 2
+        // - Kameez Armhole: Bazu Armhole Ans - Part 3
+        $rawChest = floatval($measurements['upper']['chest'] ?? 0);
+        $rawTeera = floatval($measurements['upper']['shoulder'] ?? 0);
+        $rawKameezWidth = floatval($measurements['upper']['kameez_width'] ?? 0);
 
-        if ($chatiAns > 0 && $teeraAns > 0 && $kameezWidthAns > 0) {
-            $diff = $kameezWidthAns - $teeraAns;
-            $upper['kameez_armhole'] = $chatiAns - $diff;
+        $bazuArmholeAns = ($rawChest > 0) ? ($rawChest / 4) : ($upper['chest'] ?? 0);
+        $upper['bazu_armhole'] = $bazuArmholeAns;
+
+        if ($rawKameezWidth > 0 && $rawTeera > 0 && $bazuArmholeAns > 0) {
+            $part1 = ($rawKameezWidth / 2) + 0.5;
+            $part2 = $rawTeera / 2;
+            $part3 = $part1 - $part2;
+            $upper['kameez_armhole'] = $bazuArmholeAns - $part3;
         } else {
             $upper['kameez_armhole'] = 0;
         }
-
-        $upper['bazu_armhole'] = $chatiAns;
 
         return [
             'upper' => $upper,

@@ -54,6 +54,23 @@ function getDBConnection() {
             // Table might not exist or alter already done
         }
 
+        // Auto-migration to add logo column to shops table
+        try {
+            $pdo->exec("ALTER TABLE `shops` ADD COLUMN `logo` VARCHAR(255) DEFAULT NULL");
+        } catch (PDOException $e) {}
+
+        // Auto-migration for password_resets table
+        try {
+            $pdo->exec("CREATE TABLE IF NOT EXISTS `password_resets` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `user_id` INT NOT NULL,
+                `token` VARCHAR(100) NOT NULL,
+                `expires_at` DATETIME NOT NULL,
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT `fk_pw_reset_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+        } catch (PDOException $e) {}
+
         // Auto-migration to allow assigning orders to karigar (users table)
         try {
             $checkColumn = $pdo->query("SHOW COLUMNS FROM `orders` LIKE 'assigned_to'");

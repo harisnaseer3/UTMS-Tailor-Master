@@ -22,28 +22,22 @@ $errorMsg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
-    $shopId = !empty($_POST['shop_id']) ? intval($_POST['shop_id']) : null;
+    $shopName = trim($_POST['shop_name'] ?? '');
     
     if (empty($username) || empty($password)) {
         $errorMsg = 'Please enter both username and password.';
     } else {
-        if (loginUser($username, $password, $shopId)) {
+        if (loginUser($username, $password, $shopName)) {
             header("Location: dashboard.php");
             exit();
         } else {
-            $errorMsg = 'Invalid username, password, or shop selection.';
+            $errorMsg = 'Invalid username, password, or workshop name.';
         }
     }
 }
 
-// Get Shops for dropdown selector
+// Get Shops for reference if needed
 $pdo = getDBConnection();
-$shops = [];
-try {
-    $shops = $pdo->query("SELECT id, name FROM shops ORDER BY name ASC")->fetchAll();
-} catch (PDOException $e) {
-    // Database may not be fully initialized yet, but getDBConnection() auto-initializes it
-}
 
 require_once 'includes/header.php';
 ?>
@@ -67,16 +61,10 @@ require_once 'includes/header.php';
 
         <form action="login.php" method="POST">
             <!-- Shop Selection (Required for Multi-Tenant Scoping) -->
-    <div class="form-group" id="shop-selection-group">
-    <label class="form-label" for="shop_search"><?php echo __('shop'); ?> *</label>
-        <input type="text" id="shop_search" name="shop_search" class="form-control" placeholder="<?php echo __('select_customer'); ?>..." autocomplete="off" list="shop_options" required>
-    <input type="hidden" name="shop_id" id="shop_id">
-    <datalist id="shop_options">
-            <?php foreach ($shops as $shop): ?>
-                <option value="<?php echo htmlspecialchars($shop['name']); ?>" data-id="<?php echo $shop['id']; ?>"></option>
-            <?php endforeach; ?>
-    </datalist>
-</div>
+            <div class="form-group" id="shop-selection-group">
+                <label class="form-label" for="shop_name"><?php echo __('shop'); ?> / ورکشاپ کا نام *</label>
+                <input type="text" name="shop_name" id="shop_name" class="form-control" required placeholder="Enter Workshop Name...">
+            </div>
             
             <div class="form-group">
                 <label class="form-label" for="username"><?php echo __('username'); ?> *</label>
@@ -84,7 +72,10 @@ require_once 'includes/header.php';
             </div>
             
             <div class="form-group">
-                <label class="form-label" for="password"><?php echo __('password'); ?> *</label>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label class="form-label" for="password"><?php echo __('password'); ?> *</label>
+                    <a href="forgot_password.php" style="font-size: 12px; color: var(--neon-cyan); text-decoration: none; font-weight: 500;">Forgot Password?</a>
+                </div>
                 <div style="position: relative;">
                     <input type="password" name="password" id="password" class="form-control" required placeholder="Enter password..." style="padding-inline-end: 45px;">
                     <button type="button" onclick="togglePasswordVisibility('password', this)" style="position: absolute; inset-inline-end: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;" title="Toggle Password Visibility">
@@ -110,8 +101,7 @@ require_once 'includes/header.php';
 <script>
 function setLoginMode(mode) {
     const shopGroup = document.getElementById('shop-selection-group');
-    const shopSelect = document.getElementById('shop_id');
-    const shopSearch = document.getElementById('shop_search');
+    const shopNameInput = document.getElementById('shop_name');
     const loginModeInput = document.getElementById('login_mode');
     const tabStaff = document.getElementById('tab-staff');
     const tabCustomer = document.getElementById('tab-customer');
@@ -121,10 +111,10 @@ function setLoginMode(mode) {
     
     if (mode === 'customer') {
         shopGroup.style.display = 'none';
-        shopSelect.removeAttribute('required');
-        shopSearch.removeAttribute('required');
-        shopSelect.value = '';
-        shopSearch.value = '';
+        if (shopNameInput) {
+            shopNameInput.removeAttribute('required');
+            shopNameInput.value = '';
+        }
         
         tabCustomer.style.color = 'var(--neon-gold)';
         tabCustomer.style.borderBottomColor = 'var(--neon-gold)';
@@ -134,14 +124,14 @@ function setLoginMode(mode) {
         tabStaff.style.borderBottomColor = 'transparent';
         tabStaff.style.fontWeight = '500';
         
-        // Add subtle gold tint to login button for customer
         loginBtn.className = 'btn-glass';
         loginBtn.style.borderColor = 'var(--neon-gold)';
         loginBtn.style.color = 'var(--neon-gold)';
     } else {
         shopGroup.style.display = 'block';
-        shopSelect.setAttribute('required', 'required');
-        shopSearch.setAttribute('required', 'required');
+        if (shopNameInput) {
+            shopNameInput.setAttribute('required', 'required');
+        }
         
         tabStaff.style.color = 'var(--neon-cyan)';
         tabStaff.style.borderBottomColor = 'var(--neon-cyan)';
@@ -151,34 +141,11 @@ function setLoginMode(mode) {
         tabCustomer.style.borderBottomColor = 'transparent';
         tabCustomer.style.fontWeight = '500';
         
-        // Reset cyan button class
         loginBtn.className = 'btn-glass btn-neon-cyan';
         loginBtn.style.borderColor = '';
         loginBtn.style.color = '';
     }
 }
-
-// Live shop search handling
-(function() {
-    const shopSearch = document.getElementById('shop_search');
-    const shopIdInput = document.getElementById('shop_id');
-    const shopOptions = document.getElementById('shop_options').options;
-
-    shopSearch.addEventListener('input', function () {
-        const val = this.value.trim();
-        let matched = false;
-        for (let i = 0; i < shopOptions.length; i++) {
-            if (shopOptions[i].value === val) {
-                shopIdInput.value = shopOptions[i].dataset.id;
-                matched = true;
-                break;
-            }
-        }
-        if (!matched) {
-            shopIdInput.value = '';
-        }
-    });
-})();
 </script>
 
 <?php

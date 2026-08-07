@@ -59,7 +59,7 @@ $lower = isset($measurements['lower']) ? $measurements['lower'] : [];
                     <option value="" <?php echo (empty($upper['gala_style'])) ? 'selected' : ''; ?>>- Gala Style / گلا -</option>
                     <option value="Ban" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Ban') ? 'selected' : ''; ?>>Ban / بین</option>
                     <option value="Collar" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Collar') ? 'selected' : ''; ?>>Color / کالر</option>
-                    <option value="Maghfi" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Maghfi') ? 'selected' : ''; ?>>Maghfi / مغفی</option>
+                    <option value="Maghzi" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Maghzi') ? 'selected' : ''; ?>>Maghzi / مغذی</option>
                     <option value="Teera Ban" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Teera Ban') ? 'selected' : ''; ?>>Teera Ban / تیرا بین</option>
                     <option value="Fix Collar" <?php echo (isset($upper['gala_style']) && $upper['gala_style'] === 'Fix Collar') ? 'selected' : ''; ?>>Fix Color / فکس کالر</option>
                 </select>
@@ -105,17 +105,18 @@ $lower = isset($measurements['lower']) ? $measurements['lower'] : [];
         <!-- 9. Kuff (Cuff Style) Dropdown & Size -->
         <div class="measurement-input-wrapper" style="grid-column: span 2;">
             <label for="<?php echo $idPrefix; ?>g_up_cuff_size" style="min-height: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
-                <span>Kuff Style & Size</span>
+                <span>Cuff Style & Size</span>
                 <span style="color: var(--text-muted); font-size: 10px; font-family: var(--font-urdu);">کف کا ڈیزائن اور سائز</span>
             </label>
             <div style="display: flex; gap: 8px; justify-content: center;">
                 <input type="number" step="0.1" name="gents_upper[cuff_size]" id="<?php echo $idPrefix; ?>g_up_cuff_size" class="gents-input" value="<?php echo floatval($upper['cuff_size'] ?? 0); ?>" style="width: 45%;" placeholder="Size">
                 <select name="gents_upper[sleeve_style]" id="<?php echo $idPrefix; ?>g_up_sleeve_style" class="form-control gents-input" style="width: 55%; padding: 2px; font-size: 13px; text-align: center; border:none; height:28px; margin: 0; background: rgba(0, 0, 0, 0.4); color: white;">
-                    <option value="" <?php echo (empty($upper['sleeve_style'])) ? 'selected' : ''; ?>>- Kuff Style / کف -</option>
+                    <option value="" <?php echo (empty($upper['sleeve_style'])) ? 'selected' : ''; ?>>- Cuff Style / کف -</option>
                     <option value="Stud Cuff" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Stud Cuff') ? 'selected' : ''; ?>>Stud Cuff / اسٹڈ کف</option>
                     <option value="Khula Bazu" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Khula Bazu') ? 'selected' : ''; ?>>Khula Bazu / کھلا بازو</option>
                     <option value="No Stud" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'No Stud') ? 'selected' : ''; ?>>No Stud / بغیر اسٹڈ</option>
-                    <option value="Kaj" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Kaj') ? 'selected' : ''; ?>>Kaj / کاج</option>
+                    <option value="Stud Kaj Cuff" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Stud Kaj Cuff') ? 'selected' : ''; ?>>Stud Kaj Cuff / اسٹڈ کاج کف</option>
+                    <option value="Simple Cuff" <?php echo (isset($upper['sleeve_style']) && $upper['sleeve_style'] === 'Simple Cuff') ? 'selected' : ''; ?>>Simple Cuff / سمپل کف</option>
                 </select>
             </div>
         </div>

@@ -276,8 +276,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $role === 'super_admin') {
         
         if ($editShopId > 0 && !empty($shopName)) {
             try {
-                $stmt = $pdo->prepare("UPDATE shops SET name = ?, phone = ? WHERE id = ?");
-                $stmt->execute([$shopName, $shopPhone, $editShopId]);
+                $logoFileName = null;
+                if (isset($_FILES['shop_logo']) && $_FILES['shop_logo']['error'] === UPLOAD_ERR_OK) {
+                    $fileTmp = $_FILES['shop_logo']['tmp_name'];
+                    $fileName = $_FILES['shop_logo']['name'];
+                    $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                    $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                    
+                    if (in_array($fileExt, $allowed)) {
+                        $newFileName = 'logo_' . time() . '_' . rand(1000, 9999) . '.' . $fileExt;
+                        $uploadDir = __DIR__ . '/public/uploads/logos/';
+                        if (!is_dir($uploadDir)) {
+                            mkdir($uploadDir, 0777, true);
+                        }
+                        if (move_uploaded_file($fileTmp, $uploadDir . $newFileName)) {
+                            $logoFileName = $newFileName;
+                        }
+                    }
+                }
+
+                if ($logoFileName) {
+                    $stmt = $pdo->prepare("UPDATE shops SET name = ?, phone = ?, logo = ? WHERE id = ?");
+                    $stmt->execute([$shopName, $shopPhone, $logoFileName, $editShopId]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE shops SET name = ?, phone = ? WHERE id = ?");
+                    $stmt->execute([$shopName, $shopPhone, $editShopId]);
+                }
                 $_SESSION['success_msg'] = 'Workshop successfully updated.';
             } catch (PDOException $e) {
                 $_SESSION['error_msg'] = 'Error updating workshop: ' . $e->getMessage();
@@ -440,7 +464,7 @@ if ($role === 'master' || $role === 'karigar') {
         if (!empty($custIds)) {
             $inClause = implode(',', array_fill(0, count($custIds), '?'));
             $stmtCustOrders = $pdo->prepare("
-                SELECT o.*, s.name as shop_name 
+                SELECT o.*, s.name as shop_name, s.logo as shop_logo 
                 FROM orders o 
                 JOIN shops s ON o.shop_id = s.id 
                 WHERE o.customer_id IN ($inClause) 
@@ -826,8 +850,11 @@ require_once 'includes/header.php';
                                         <span style="color: var(--neon-emerald); font-size: 12px; border: 1px solid var(--neon-emerald); padding: 2px 8px; border-radius: 12px; background: rgba(13,242,138,0.1);"><?php echo __('status_ready'); ?></span>
                                     <?php endif; ?>
                                 </div>
-                                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">
-                                    Shop: <strong><?php echo htmlspecialchars($ord['shop_name']); ?></strong>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                                    <?php if (!empty($ord['shop_logo']) && file_exists('public/uploads/logos/' . $ord['shop_logo'])): ?>
+                                        <img src="public/uploads/logos/<?php echo htmlspecialchars($ord['shop_logo']); ?>" alt="Shop Logo" style="width: 24px; height: 24px; object-fit: contain; border-radius: 4px;">
+                                    <?php endif; ?>
+                                    <span>Shop: <strong><?php echo htmlspecialchars($ord['shop_name']); ?></strong></span>
                                 </div>
                                 <div style="font-size: 13px; color: var(--text-secondary);">
                                     Price: Rs. <?php echo number_format($ord['price'], 2); ?> &bull; Balance: 
@@ -894,7 +921,10 @@ require_once 'includes/header.php';
 
     <!-- Shops Table -->
     <div class="glass-card" style="margin-top: 30px;">
-        <h3 style="margin-bottom: 15px; font-size: 20px; color: var(--neon-cyan);">Registered Workshops</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; font-size: 20px; color: var(--neon-cyan);">Registered Workshops</h3>
+            <input type="text" id="shops-search" placeholder="Search workshops..." oninput="filterTable('shops-table', this.value)" style="width: 220px; font-size: 13px; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+        </div>
         <div style="overflow-x: auto;">
             <table id="shops-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
@@ -910,7 +940,12 @@ require_once 'includes/header.php';
                     <?php foreach ($shopsList as $shop): ?>
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
                         <td style="padding: 10px;"><?php echo $shop['id']; ?></td>
-                        <td style="padding: 10px; font-weight: bold;"><?php echo htmlspecialchars($shop['name']); ?></td>
+                        <td style="padding: 10px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                            <?php if (!empty($shop['logo']) && file_exists('public/uploads/logos/' . $shop['logo'])): ?>
+                                <img src="public/uploads/logos/<?php echo htmlspecialchars($shop['logo']); ?>" alt="Logo" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px; border: 1px solid rgba(255,255,255,0.1);">
+                            <?php endif; ?>
+                            <span><?php echo htmlspecialchars($shop['name']); ?></span>
+                        </td>
                         <td style="padding: 10px;"><?php echo htmlspecialchars($shop['phone']); ?></td>
                         <td style="padding: 10px;"><?php echo date('M d, Y', strtotime($shop['created_at'])); ?></td>
                         <td style="padding: 10px; text-align: right;">
@@ -931,7 +966,10 @@ require_once 'includes/header.php';
 
     <!-- Users Table -->
     <div class="glass-card" style="margin-top: 30px;">
-        <h3 style="margin-bottom: 15px; font-size: 20px; color: var(--neon-gold);">System Users</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin: 0; font-size: 20px; color: var(--neon-gold);">System Users</h3>
+            <input type="text" id="users-search" placeholder="Search users..." oninput="filterTable('users-table', this.value)" style="width: 220px; font-size: 13px; padding: 6px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text-primary); outline: none;">
+        </div>
         <div style="overflow-x: auto;">
             <table id="users-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                 <thead>
@@ -1170,7 +1208,7 @@ require_once 'includes/header.php';
         <h3 style="color: var(--neon-gold); font-size: 20px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             ✏️ Edit Workshop
         </h3>
-        <form action="dashboard.php" method="POST">
+        <form action="dashboard.php" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="action" value="edit_shop">
             <input type="hidden" name="edit_shop_id" id="edit_shop_id" value="">
             
@@ -1182,6 +1220,11 @@ require_once 'includes/header.php';
             <div class="form-group">
                 <label class="form-label" for="edit_shop_phone">Shop Phone</label>
                 <input type="text" name="shop_phone" id="edit_shop_phone" class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="edit_shop_logo">Change Workshop Logo</label>
+                <input type="file" name="shop_logo" id="edit_shop_logo" class="form-control" accept="image/*">
             </div>
             
             <div style="display: flex; gap: 10px; margin-top: 25px;">

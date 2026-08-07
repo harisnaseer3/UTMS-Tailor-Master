@@ -97,12 +97,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorMsg = 'Passwords do not match.';
         } else {
             $pdo = getDBConnection();
+            
+            // Handle logo upload
+            $logoFileName = null;
+            if (isset($_FILES['shop_logo']) && $_FILES['shop_logo']['error'] === UPLOAD_ERR_OK) {
+                $fileTmp = $_FILES['shop_logo']['tmp_name'];
+                $fileName = $_FILES['shop_logo']['name'];
+                $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                
+                if (in_array($fileExt, $allowed)) {
+                    $newFileName = 'logo_' . time() . '_' . rand(1000, 9999) . '.' . $fileExt;
+                    $uploadDir = __DIR__ . '/public/uploads/logos/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    if (move_uploaded_file($fileTmp, $uploadDir . $newFileName)) {
+                        $logoFileName = $newFileName;
+                    }
+                }
+            }
+
             try {
                 $pdo->beginTransaction();
                 
-                // 1. Insert new shop
-                $stmtShop = $pdo->prepare("INSERT INTO shops (name, phone) VALUES (?, ?)");
-                $stmtShop->execute([$shopName, $shopPhone]);
+                // 1. Insert new shop with logo
+                $stmtShop = $pdo->prepare("INSERT INTO shops (name, phone, logo) VALUES (?, ?, ?)");
+                $stmtShop->execute([$shopName, $shopPhone, $logoFileName]);
                 $shopId = $pdo->lastInsertId();
                 
                 // 2. Hash password and insert master user
@@ -153,7 +174,7 @@ require_once 'includes/header.php';
             </button>
         </div>
 
-        <form action="register.php" method="POST" id="reg-form">
+        <form action="register.php" method="POST" enctype="multipart/form-data" id="reg-form">
             <input type="hidden" name="reg_mode" id="reg_mode" value="<?php echo $isSuperAdmin ? 'shop' : 'customer'; ?>">
             
             <!-- Section 1: Shop Register Container -->
@@ -171,6 +192,11 @@ require_once 'includes/header.php';
                 <div class="form-group">
                     <label class="form-label" for="shop_phone">Workshop Phone</label>
                     <input type="text" name="shop_phone" id="shop_phone" class="form-control" placeholder="e.g. 021-1234567">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="shop_logo">Workshop Logo / ورکشاپ کا لوگو</label>
+                    <input type="file" name="shop_logo" id="shop_logo" class="form-control" accept="image/*">
                 </div>
 
                 <h3 style="color: var(--neon-orchid); font-size: 16px; margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid rgba(184, 41, 242, 0.15); padding-bottom: 5px;">

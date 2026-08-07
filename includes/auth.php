@@ -57,10 +57,22 @@ function canViewCustomerContact() {
 }
 
 // Login user action
-function loginUser($username, $password, $shopId = null) {
+function loginUser($username, $password, $shopInput = null) {
     $pdo = getDBConnection();
     
-    if (!empty($shopId)) {
+    if (!empty($shopInput)) {
+        // Check if shopInput is numeric ID or shop name string
+        if (is_numeric($shopInput)) {
+            $shopId = intval($shopInput);
+        } else {
+            $stmtShop = $pdo->prepare("SELECT id FROM shops WHERE LOWER(TRIM(name)) = LOWER(TRIM(?))");
+            $stmtShop->execute([$shopInput]);
+            $shopId = $stmtShop->fetchColumn();
+            if (!$shopId) {
+                return false; // Shop name not found
+            }
+        }
+        
         $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? AND shop_id = ?");
         $stmt->execute([$username, $shopId]);
     } else {
